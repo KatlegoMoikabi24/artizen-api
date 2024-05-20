@@ -4,11 +4,10 @@ import axios from 'axios';
 
 const artworks = ref([]);
 const imageApiUrl = 'http://127.0.0.1:3333/api/v1/artwork/image/';
-
-// Fetch data when the component is mounted
+const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
 onMounted(async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:3333/api/v1/artwork');
+    const response = await axios.get(getAllArtworks);
     artworks.value = response.data;
   } catch (error) {
     console.error('Error fetching artworks:', error);
@@ -39,7 +38,14 @@ onMounted(async () => {
             <b>{{ artwork.status }}</b>
           </p>
           <v-btn v-if="artwork.status === 'Rejected'" depressed color="info">Re-Upload Artwork</v-btn>
-          <v-btn v-if="artwork.status === 'pending'" depressed color="error">Buy Artwork</v-btn>
+          <v-btn
+            v-if="artwork.status === 'pending'"
+            elevation="5"
+            color="success"
+            :to="'/ui-components/menus?art='+artwork.id"
+          >
+            Buy Artwork
+          </v-btn>
         </v-card-text>
       </v-card>
     </v-col>

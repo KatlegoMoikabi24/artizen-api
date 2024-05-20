@@ -42,85 +42,51 @@
     </v-row>
   </BaseCard>
 
-  <h1 class="pl-2">My Artwork</h1>
+  <h1 class="pl-2">My Artworks</h1>
   <v-divider></v-divider>
   <v-row class="pt-5">
-    <v-col cols="12" lg="4">
-      <v-card>
+    <v-col v-for="artwork in artworks" :key="artwork.id" cols="12" lg="4">
+      <v-card elevation="7">
         <img
-          style="width: 100%"
-          src="@/assets/images/background/u1.jpg"
-         alt="artwork"/>
-        <v-card-text>
-          <h5 class="title font-weight-medium mb-2 text-h6">
-            Yellow Mellow Art Painting
-          </h5>
-          <h5 class="title font-weight-medium mb-2 text-h6">
-            R4 800
-          </h5>
-          <p class="mb-3 text-body-2 text-grey-darken-1">
-            Artwork design by K Msimango. -
-            <b>  Rejected  </b>
-          </p>
-          <v-btn depressed color="info">Re-Upload Artwork</v-btn>
-        </v-card-text>
-      </v-card>
-    </v-col>
-    <v-col cols="12" lg="4">
-      <v-card>
-        <img
-          style="width: 100%"
-          src="@/assets/images/background/u2.jpg"
-         alt=""/>
-        <v-card-text>
-          <h5 class="title font-weight-medium mb-2 text-h6">
-            Pinkish 2018 Painting
-          </h5>
-          <h5 class="title font-weight-medium mb-2 text-h6">
-            R5 200
-          </h5>
-          <p class="mb-3 text-body-2 text-grey-darken-1">
-            Artwork design by K Msimango. -
-            <b>  Approved  </b>
-          </p>
-          <v-btn depressed color="error">Delete Artwork</v-btn>
-        </v-card-text>
-      </v-card>
-    </v-col>
-    <v-col cols="12" lg="4">
-      <v-card>
-        <img
-          style="width: 100%"
-          src="@/assets/images/background/u3.jpg"
+          style="width: 100%;"
+          height="320"
+          :src="`${imageApiUrl}${artwork.picture}`"
+          :alt="artwork.name"
         />
         <v-card-text>
-          <h5 class="title font-weight-medium mb-2 text-h6">
-            White Khalamari Painting
-          </h5>
-          <h5 class="title font-weight-medium mb-2 text-h6">
-           R2 800
-          </h5>
-          <p class="mb-3 text-body-2 text-grey-darken-1">
-            Artwork design by K Msimango. -
-            <b>  Approved  </b>
+          <h5 class="title font-weight-medium mb-2 text-h6">{{ artwork.name }}</h5>
+          <h5 class="title font-weight-medium mb-2 text-h6"> R {{ artwork.price }}</h5>
+          <p class="mb-3">
+            Artwork design by
+            <b>{{ `${userDetails.name} ${userDetails.surname}` }}</b>
           </p>
-
-          <v-row class="mt-5">
-            <v-btn class="ml-2" depressed color="error">Delete Artwork</v-btn>
-          </v-row>
+           <b>Status: </b> {{ artwork.status.toUpperCase() }}
+          <br>
+          <br>
+          <v-btn
+            v-if="artwork.status !== 'approved'"
+            elevation="5"
+            color="success"
+            @click="deleteArtwork(artwork)"
+          >Delete</v-btn>
         </v-card-text>
       </v-card>
     </v-col>
   </v-row>
-
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import BaseCard from "@/components/BaseCard.vue";
 import axios from "axios";
 
 const imageUrl = ref<string | null>(null);
+const artworks = ref([]);
+const userDetails = ref({});
+const imageApiUrl = 'http://127.0.0.1:3333/api/v1/artwork/image/';
+const getByArtistId = 'http://127.0.0.1:3333/api/v1/artwork/artist/';
+const deleteArtworkAPI = 'http://127.0.0.1:3333/api/v1/artwork/';
+
 const artwork = ref({
   id: 1,
   name: '',
@@ -131,6 +97,11 @@ const artwork = ref({
 });
 const selectedFile = ref<File | null>(null);
 
+async function deleteArtwork(item) {
+  const response = await axios.delete(deleteArtworkAPI + item.id);
+
+  alert(response.data.message);
+}
 function handleFileUpload(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files ? target.files[0] : null;
@@ -145,7 +116,18 @@ function handleFileUpload(event: Event) {
     imageUrl.value = null;
   }
 }
+onMounted(async () => {
+  try {
+    const user = JSON.parse(<string>localStorage.getItem('user'));
+    const response = await axios.get(getByArtistId + user.id);
 
+    artworks.value = response.data.artworks;
+    userDetails.value = response.data.user;
+
+  } catch (error) {
+    console.error('Error fetching artworks:', error);
+  }
+});
 async function upload() {
 
   const user = JSON.parse(<string>localStorage.getItem('user'));

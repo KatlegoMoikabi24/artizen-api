@@ -5,8 +5,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview --port 5050",
-    "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "apexcharts": "^3.35.0",
@@ -28,8 +27,6 @@
     "@vue/eslint-config-typescript": "^10.0.0",
     "@vue/tsconfig": "^0.1.3",
     "@vuetify/vite-plugin": "^1.0.0-alpha.3",
-    "eslint": "^8.5.0",
-    "eslint-plugin-vue": "^8.2.0",
     "prettier": "^2.5.1",
     "sass": "^1.49.9",
     "sass-loader": "^10.0.0",

@@ -28,7 +28,7 @@ export default [
     title: "Payments",
     icon: "mdi-form-dropdown",
     to: "/ui-components/menus",
-    role: "user"
+    role: "*"
 
   },
   {
@@ -43,4 +43,10 @@ export default [
     to: "/history",
     role: "*"
   },
+  {
+    title: "Logout",
+    icon: "mdi-logout",
+    to: "/logout",
+    role: "*"
+  }
 ];

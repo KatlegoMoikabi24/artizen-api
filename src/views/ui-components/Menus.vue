@@ -1,23 +1,23 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row v-if="onBuy">
       <v-col cols="12" md="6">
         <BaseCard heading="Your Order">
           <div class="order-details">
             <div class="order-item" v-for="item in cartItems" :key="item.id">
               <div class="item-name">
-                <h3>{{ item.name }}</h3>
+                <h2>{{ item.name }}</h2>
               </div>
               <div class="item-quantity">
-                <b>Quantity:</b> {{ item.quantity }}
+                <b>Quantity:</b> 1
               </div>
               <div class="item-price">
-                <b>Price: R</b>{{ item.price.toFixed(2) }}
+                <strong>Price: R</strong>{{ item.price.toFixed(2) }}
               </div>
-            </div>
-            <v-divider></v-divider>
-            <div class="order-total">
-              <strong>Total: R{{ totalAmount.toFixed(2) }}</strong>
+              <v-divider></v-divider>
+              <div class="order-total">
+                <strong>Total: R{{ item.price.toFixed(2) }}</strong>
+              </div>
             </div>
           </div>
         </BaseCard>
@@ -25,7 +25,11 @@
       <v-col cols="12" md="6">
         <BaseCard heading="Payment Gateway">
           <div class="paypal-header">
-            <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal Logo" class="paypal-logo" />
+            <img
+              src="https://www.paypalobjects.com/webstatic/icon/pp258.png"
+              alt="PayPal Logo"
+              class="paypal-logo"
+            />
             <h2>Checkout with PayPal</h2>
           </div>
           <v-form @submit.prevent="handlePaymentSubmit">
@@ -56,7 +60,7 @@
           </v-form>
         </BaseCard>
       </v-col>
-    </v-row>
+    </v-row >
     <v-row>
       <v-col cols="12">
         <BaseCard heading="Payment History">
@@ -75,19 +79,19 @@
   </v-container>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import BaseCard from '@/components/BaseCard.vue';
-import { format } from 'date-fns';
+import { useRoute } from 'vue-router';
+import axios from "axios";
 
 const cardNumber = ref<string>('');
 const expiryDate = ref<string>('');
 const cvv = ref<string>('');
 const totalAmount = ref<number>(100);
+const onBuy = ref(false);
+const route = useRoute();
 
-const cartItems = ref([
-  { id: 1, name: 'Tut Artwork', quantity: 2, price: 25 },
-  { id: 2, name: 'Mzansi Artwork Desgin', quantity: 1, price: 50 },
-]);
+const cartItems = ref([]);
 
 const paymentHistory = ref([
   { id: 1, date: new Date(), amount: 100, method: 'Credit Card' },
@@ -100,8 +104,23 @@ const paymentHistoryHeaders = [
   { text: 'Method', value: 'method' },
 ];
 
-// Calculate total amount from cart items
-totalAmount.value = cartItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0);
+onMounted(async () => {
+  try {
+    if (route.query.art) {
+
+      const getArtwork = 'http://127.0.0.1:3333/api/v1/artwork/';
+      const response = await axios.get(getArtwork+ route.query.art);
+      onBuy.value = true;
+      cartItems.value.push(response.data);
+    } else {
+      onBuy.value = false;
+    }
+  } catch (error) {
+    console.error('Error fetching artworks:', error);
+  }
+});
+
+totalAmount.value = cartItems.value.reduce((sum, item) => sum + item.price * 1, 0);
 
 function handlePaymentSubmit() {
   // Simulate payment processing

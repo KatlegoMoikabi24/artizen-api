@@ -1,104 +1,66 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from 'vue';
+import axios from "axios";
 
 const select = ref("March");
 const items = ref(["March", "April", "May", "June"]);
 
-const monthtable = ref([
-  {
-    id: 1,
-    activestate: "",
-    leadname: "Dan Masethe",
-    leademail: "Web Designer",
-    projectname: "Monalisa Painting",
-    statuscolor: "blue lighten-1 white--text",
-    statustext: "Painting",
-    money: "R3.9K",
-  },
-  {
-    id: 2,
-    activestate: "",
-    leadname: "Andrew",
-    leademail: "Painter",
-    projectname: "WaterMark",
-    statuscolor: "info",
-    statustext: "Medium",
-    money: "R23.9K",
-  },
-  {
-    id: 3,
-    activestate: "",
-    leadname: "Karabo Mosala",
-    leademail: "Designer",
-    projectname: "MedicalPro Theme",
-    statuscolor: "warning",
-    statustext: "Sculpture",
-    money: "R12.9K",
-  },
-  {
-    id: 4,
-    activestate: "",
-    leadname: "Nirav Joshi",
-    leademail: "Frontend Eng",
-    projectname: "Monalisa Painting",
-    statuscolor: "error",
-    statustext: "Painting",
-    money: "R10.9K",
-  },
-]);
+const monthtable = ref([]);
+
+const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
+onMounted(async () => {
+  try {
+
+    const response = await axios.get(getAllArtworks);
+    monthtable.value = response.data;
+  } catch (error) {
+    console.error('Error fetching artworks:', error);
+  }
+});
 </script>
 
 <template>
-  <v-card flat class="w-100 h-100">
+  <v-card elevation="3" class="w-100 h-100">
+
     <v-card-text>
       <div class="d-sm-flex align-center">
         <div>
-          <h2 class="title text-h6 font-weight-medium">Artwork Product Performance</h2>
+          <h2 class="title text-h6 font-weight-medium">Overall Artworks</h2>
         </div>
         <v-spacer></v-spacer>
         <div class="ml-auto">
-          <v-select
-            v-model="select"
-            :items="items"
-            variant="outlined"
-            dense
-            hide-details
-          ></v-select>
+          <v-row>
+            <v-btn elevation="7">Export to Excel</v-btn>
+            <v-btn class="ml-2" color="default" elevation="5">Export to CSV</v-btn>
+          </v-row>
         </div>
       </div>
-      <v-table class="month-table mt-7">
+
+      <v-table class="month-table mt-10">
+
         <template v-slot:default>
+
           <thead>
             <tr>
-              <th class="font-weight-medium text-subtitle-1">Id</th>
+              <th class="font-weight-medium text-subtitle-1">ID</th>
               <th class="font-weight-medium text-subtitle-1">Artist</th>
               <th class="font-weight-medium text-subtitle-1">Artwork Name</th>
-              <th class="font-weight-medium text-subtitle-1">Artwork Type</th>
+              <th class="font-weight-medium text-subtitle-1">Artwork Status</th>
               <th class="font-weight-medium text-subtitle-1">Price</th>
-              <th class="font-weight-medium text-subtitle-1">Action</th>
+              <th class="font-weight-medium text-subtitle-1">Actionable Item</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="item in monthtable"
-              :key="item.leadname"
-              :class="item.activestate"
+              :key="item.id"
               class="month-item"
             >
               <td>{{ item.id }}</td>
               <td>
                 <h4 class="font-weight-bold text-no-wrap">
-                  {{ item.leadname }}
+                  {{ item.name }}
                 </h4>
-                <h6
-                  class="
-                    text-no-wrap
-                    font-weight-regular
-                    text-body-2 text-grey-darken-1
-                  "
-                >
-                  {{ item.leademail }}
-                </h6>
               </td>
               <td>
                 <h5
@@ -107,23 +69,25 @@ const monthtable = ref([
                     text-no-wrap text-body-2 text-grey-darken-1
                   "
                 >
-                  {{ item.projectname }}
+                  {{ item.name }}
                 </h5>
               </td>
               <td>
                 <v-chip
-                  class="ma-2"
                   :color="item.statuscolor"
-                  size="small"
+                  size="large"
                   label
-                  >{{ item.statustext }}</v-chip
-                >
+                  ><i>{{ item.status.toUpperCase() }}</i>
+                </v-chip >
               </td>
               <td>
-                <h4>{{ item.money }}</h4>
+                <h4>R {{ item.price }}</h4>
               </td>
               <td>
-                <v-btn>Approved</v-btn>
+                <v-row>
+                  <v-btn class="pl-5 ml-2" color="success">Approve</v-btn>
+                  <v-btn class="pl-5 ml-2" color="error">Reject</v-btn>
+                </v-row>
               </td>
             </tr>
           </tbody>
