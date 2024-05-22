@@ -1,9 +1,34 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, onMounted } from 'vue';
 import sidebarItems from "./sidebarItem";
 import LogoDark from "../logo/LogoDark.vue";
 
 const sidebarMenu = ref(sidebarItems);
+const user = JSON.parse(<string>localStorage.getItem('user'));
+
+onMounted(async () => {
+
+  if(!user) {
+    alert('Unauthorized Access, Please login');
+  } else {
+    const isFirstLogin = localStorage.getItem('isFirstLogin');
+
+    if (!isFirstLogin) {
+      localStorage.setItem('isFirstLogin', 'false');
+
+      location.reload();
+    }
+  }
+});
+
+async function action(item: any) {
+
+  if(item === '/auth/login'){
+    localStorage.clear();
+  }
+  location.replace(item);
+
+}
 </script>
 
 <template>
@@ -15,7 +40,12 @@ const sidebarMenu = ref(sidebarItems);
     <div class="scrollnavbar">
       <v-list class="pa-4" color="transparent">
         <template v-for="(item, i) in sidebarMenu" :key="i">
-          <v-list-item v-if="item.role === 'artist' || item.role === '*' " :to="item.to" rounded="lg" class="mb-1">
+          <v-list-item
+            v-if="item.role === user.role || item.role === '*' "
+            @click="action(item.to)"
+            rounded="lg"
+            class="mb-1"
+          >
             <v-list-item-avatar start class="v-list-item-avatar--start">
               <v-icon class="feather-sm v-icon v-icon--size-default">{{
                 item.icon

@@ -8,15 +8,32 @@ const items = ref(["March", "April", "May", "June"]);
 const monthtable = ref([]);
 
 const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
+const approveAPI = 'http://127.0.0.1:3333/api/v1/artwork/approve/';
+const rejectAPI = 'http://127.0.0.1:3333/api/v1/artwork/reject/';
+
 onMounted(async () => {
   try {
-
     const response = await axios.get(getAllArtworks);
     monthtable.value = response.data;
   } catch (error) {
     console.error('Error fetching artworks:', error);
   }
 });
+
+async function approve(id: any) {
+  await axios.put(approveAPI + id).then(() => {
+    alert(`Artwork approved successfully!`);
+  }).catch(error => {
+    alert(`Failed to approve artworks:${error}`);
+  })
+}
+async function reject(id: any) {
+  await axios.put(rejectAPI+id).then(() => {
+    alert(`Artwork rejected successfully!`);
+  }).catch(error => {
+    alert(`Failed to rejected artworks:${error}`);
+  })
+}
 </script>
 
 <template>
@@ -77,7 +94,7 @@ onMounted(async () => {
                   :color="item.statuscolor"
                   size="large"
                   label
-                  ><i>{{ item.status.toUpperCase() }}</i>
+                  ><b>{{ (item.status === "" ? "REJECTED" : item.status.toUpperCase()) }}</b>
                 </v-chip >
               </td>
               <td>
@@ -85,8 +102,24 @@ onMounted(async () => {
               </td>
               <td>
                 <v-row>
-                  <v-btn class="pl-5 ml-2" color="success">Approve</v-btn>
-                  <v-btn class="pl-5 ml-2" color="error">Reject</v-btn>
+                  <v-btn
+                    class="pl-5 ml-2"
+                    color="success"
+                    @click="approve(item.id)"
+                    elevation="7"
+                    :disabled="item.status === 'approved'  || item.status === 'sold'"
+                  >
+                    Approve
+                  </v-btn>
+                  <v-btn
+                    class="pl-5 ml-2"
+                    color="error"
+                    @click="reject(item.id)"
+                    elevation="7"
+                    :disabled="item.status === '' || item.status === 'sold'"
+                  >
+                    Reject
+                  </v-btn>
                 </v-row>
               </td>
             </tr>

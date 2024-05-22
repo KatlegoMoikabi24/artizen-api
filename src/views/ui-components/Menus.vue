@@ -32,7 +32,7 @@
             />
             <h2>Checkout with PayPal</h2>
           </div>
-          <v-form @submit.prevent="handlePaymentSubmit">
+          <v-form @submit.prevent="buyArtwork">
             <v-text-field
               label="Card Number"
               v-model="cardNumber"
@@ -56,24 +56,88 @@
               :value="`R${totalAmount.toFixed(2)}`"
               readonly
             ></v-text-field>
-            <v-btn color="primary" type="submit" block>Pay Now</v-btn>
+            <v-btn
+              color="primary"
+              type="submit"
+              block
+            >Pay Now</v-btn>
           </v-form>
         </BaseCard>
       </v-col>
     </v-row >
     <v-row>
       <v-col cols="12">
-        <BaseCard heading="Payment History">
-          <v-table
-            :headers="paymentHistoryHeaders"
-            :items="paymentHistory"
-            class="elevation-1"
-          >
-            <template v-slot:item.amount="{ item }">
-              <span>R{{ item.amount.toFixed(2) }}</span>
-            </template>
-          </v-table>
-        </BaseCard>
+        <v-card elevation="3" class="w-100 h-100">
+
+          <v-card-text>
+            <div class="d-sm-flex align-center">
+              <div>
+                <h2 class="title text-h6 font-weight-medium">Payment History</h2>
+              </div>
+              <v-spacer></v-spacer>
+              <div class="ml-auto">
+                <v-row>
+                  <v-btn elevation="7">Export to Excel</v-btn>
+                  <v-btn class="ml-2" color="default" elevation="5">Export to CSV</v-btn>
+                </v-row>
+              </div>
+            </div>
+
+            <v-table class="month-table mt-10">
+
+              <template v-slot:default>
+
+                <thead>
+                <tr>
+                  <th class="font-weight-medium text-subtitle-1">ID</th>
+                  <th class="font-weight-medium text-subtitle-1">Artwork Name</th>
+                  <th class="font-weight-medium text-subtitle-1">Payment Date</th>
+                  <th class="font-weight-medium text-subtitle-1">Payment Status</th>
+                  <th class="font-weight-medium text-subtitle-1">Payment Amount</th>
+                  <th class="font-weight-medium text-subtitle-1">Payment Method</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr
+                  v-for="item in paymentHistory"
+                  :key="item.id"
+                  class="month-item"
+                >
+                  <td>{{ item.id }}</td>
+                  <td>
+                    <h4 class="font-weight-bold text-no-wrap">
+                      {{ item.name }}
+                    </h4>
+                  </td>
+                  <td>
+                    <h5
+                      class="font-weight-mediumtext-no-wrap
+                              text-body-2 text-grey-darken-1"
+                    >
+                      {{ item.created_at }}
+                    </h5>
+                  </td>
+                  <td>
+                    <v-chip
+                      color="success"
+                      size="large"
+                      label
+                    ><b>{{ (item.status === "" ? "REJECTED" : item.status.toUpperCase()) }}</b>
+                    </v-chip >
+                  </td>
+                  <td>
+                    <h3>R {{ item.price }}</h3>
+                  </td>
+                  <td>
+                    <h2>Paypal</h2>
+                  </td>
+                </tr>
+                </tbody>
+              </template>
+            </v-table>
+          </v-card-text>
+        </v-card>
+
       </v-col>
     </v-row>
   </v-container>
@@ -93,42 +157,54 @@ const route = useRoute();
 
 const cartItems = ref([]);
 
-const paymentHistory = ref([
-  { id: 1, date: new Date(), amount: 100, method: 'Credit Card' },
-  { id: 2, date: new Date(), amount: 50, method: 'PayPal' },
-]);
+const paymentHistory = ref([]);
+const getArtwork = 'http://127.0.0.1:3333/api/v1/artwork/';
+const buyArtworkAPI = 'http://127.0.0.1:3333/api/v1/artwork/buy/';
+const getPaymentsAPI = 'http://127.0.0.1:3333/api/v1/payments/user/';
+const getAllPaymentsAPI = 'http://127.0.0.1:3333/api/v1/payments/';
 
-const paymentHistoryHeaders = [
-  { text: 'Date', value: 'date' },
-  { text: 'Amount', value: 'amount' },
-  { text: 'Method', value: 'method' },
-];
+let artId = ref('');
+const user = JSON.parse(<string>localStorage.getItem('user'));
 
 onMounted(async () => {
   try {
     if (route.query.art) {
-
-      const getArtwork = 'http://127.0.0.1:3333/api/v1/artwork/';
-      const response = await axios.get(getArtwork+ route.query.art);
+      artId = route.query.art;
+      const response = await axios.get(getArtwork + artId);
       onBuy.value = true;
       cartItems.value.push(response.data);
     } else {
       onBuy.value = false;
     }
+
+    const payments_response = await axios.get((user.role === 'admin' ? getAllPaymentsAPI : getPaymentsAPI + user.id));
+    paymentHistory.value = payments_response.data;
   } catch (error) {
-    console.error('Error fetching artworks:', error);
+    alert('Error Occurred : ' + error);
   }
 });
 
 totalAmount.value = cartItems.value.reduce((sum, item) => sum + item.price * 1, 0);
 
 function handlePaymentSubmit() {
-  // Simulate payment processing
-  alert('Payment processed successfully!');
-  // Clear form fields
+
   cardNumber.value = '';
   expiryDate.value = '';
   cvv.value = '';
+}
+
+async function buyArtwork() {
+  try {
+
+      await axios.put(buyArtworkAPI + artId, {
+        bought_by : user.id,
+      }).then(() => {
+        onBuy.value = false;
+        alert('Artwork purchased Successfully');
+      });
+  } catch (error) {
+    alert('Error Occured : ' + error);
+  }
 }
 </script>
 <style scoped>

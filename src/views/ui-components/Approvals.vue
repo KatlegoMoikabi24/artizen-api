@@ -17,7 +17,7 @@ onMounted(async () => {
 
 <template>
   <h1>
-    Art Gallery
+    Manage Artworks
   </h1>
 
   <v-divider></v-divider>
@@ -35,28 +35,32 @@ onMounted(async () => {
           <h5 class="title font-weight-medium mb-2 text-h6"> R {{ artwork.price }}</h5>
           <p class="mb-3">
             Artwork design by
-<!--            <b>{{ `${userDetails.name} ${userDetails.surname}` }}</b>-->
+            <!--  <b>{{ `${userDetails.name} ${userDetails.surname}` } }</b>   -->
           </p>
-          <b>Status: </b> {{ artwork.status.toUpperCase() }}
+          <b>Status: </b> {{( artwork.status === '' ? 'Rejected' :  artwork.status.toUpperCase()) }}
           <br>
           <br>
-          <v-btn block v-if="artwork.status === ''" depressed color="error" disabled>Rejected</v-btn>
+          <v-btn
+            block
+            v-if="artwork.status === ''"
+            depressed color="info"
+          >Approve</v-btn>
+
           <v-btn
             v-if="artwork.status === 'pending'"
             depressed color="info"
-            disabled
             block
           >
-            Pending Approval
+            Approve
           </v-btn>
+
           <v-btn
-            v-if="artwork.status === 'approved'"
-            elevation="5"
-            color="success"
-            :to="'/ui-components/menus?art='+artwork.id"
+            v-if="artwork.status === 'pending'"
+            class="mt-2"
+            depressed color="error"
             block
           >
-            Buy Artwork
+            Reject
           </v-btn>
         </v-card-text>
       </v-card>

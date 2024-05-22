@@ -180,8 +180,11 @@ export default {
         const user =  response.data.data.user;
 
         localStorage.setItem('user', JSON.stringify(user));
-
-        await this.$router.push('/dashboard');
+        if(user.role === 'admin') {
+          await this.$router.push('/dashboard');
+        } else {
+          await this.$router.push('/ui-components/buttons');
+        }
       } catch (error) {
         alert(error.response.data.error);
       }

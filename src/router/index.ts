@@ -22,6 +22,11 @@ const routes = [
         component: () => import('@/views/ui-components/Buttons.vue'),
       },
       {
+        name: 'Approvals',
+        path: 'ui-components/approvals',
+        component: () => import('@/views/ui-components/Approvals.vue'),
+      },
+      {
         name: 'Cards',
         path: 'ui-components/cards',
         component: () => import('@/views/ui-components/Cards.vue'),

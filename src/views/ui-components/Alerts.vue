@@ -64,7 +64,7 @@
           <br>
           <br>
           <v-btn
-            v-if="artwork.status !== 'approved'"
+            v-if="artwork.status !== 'approved' || artwork.status === 'sold'"
             elevation="5"
             color="success"
             @click="deleteArtwork(artwork)"

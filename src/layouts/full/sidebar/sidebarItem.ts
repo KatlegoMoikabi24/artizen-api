@@ -3,7 +3,7 @@ export default [
     title: "Dashboard",
     icon: "mdi-view-dashboard-outline",
     to: "/dashboard",
-    role: "*"
+    role: "admin"
   },
   {
     title: "My Artwork",
@@ -12,41 +12,46 @@ export default [
     role: "artist"
   },
   {
+    title: "Manage Artworks",
+    icon: "mdi-alert-circle-outline",
+    to: "/ui-components/approvals",
+    role: "admin"
+  },
+  {
     title: "Art Gallery",
-    icon: "mdi-radiobox-blank",
+    icon: "mdi-file-image",
     to: "/ui-components/buttons",
     role: "*"
   },
   {
-    title: "Artizen Cart",
-    icon: "mdi-card-outline",
-    to: "/ui-components/cards",
-    role: "user"
-
-  },
-  {
     title: "Payments",
-    icon: "mdi-form-dropdown",
+    icon: "mdi-cash",
     to: "/ui-components/menus",
     role: "*"
 
   },
   {
-    title: "Settings",
-    icon: "mdi-table",
-    to: "/ui-components/tables",
-    role: "artist"
+    title: "Reports",
+    icon: "mdi-chart-bar",
+    to: "/ui-components/",
+    role: "blocked"
   },
   {
     title: "History",
     icon: "mdi-view-dashboard-outline",
     to: "/history",
-    role: "*"
+    role: "blocked"
+  },
+  {
+    title: "Settings",
+    icon: "mdi-cog",
+    to: "/ui-components/tables",
+    role: "admin"
   },
   {
     title: "Logout",
     icon: "mdi-logout",
-    to: "/logout",
+    to: "/auth/login",
     role: "*"
   }
 ];
