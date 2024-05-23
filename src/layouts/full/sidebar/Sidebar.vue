@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import sidebarItems from "./sidebarItem";
 import LogoDark from "../logo/LogoDark.vue";
+import Swal from "sweetalert2";
 
 const sidebarMenu = ref(sidebarItems);
 const user = JSON.parse(<string>localStorage.getItem('user'));
@@ -9,7 +10,12 @@ const user = JSON.parse(<string>localStorage.getItem('user'));
 onMounted(async () => {
 
   if(!user) {
-    alert('Unauthorized Access, Please login');
+     await Swal.fire({
+       title: 'Unauthorized Access!',
+       text: 'Unauthorized Access, Please login',
+       icon: 'error',
+       confirmButtonText: 'Ok'
+     });
     return;
   } else {
     const isFirstLogin = localStorage.getItem('isFirstLogin');

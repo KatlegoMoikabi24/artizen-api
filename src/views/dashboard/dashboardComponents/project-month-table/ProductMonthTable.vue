@@ -1,38 +1,100 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const select = ref("March");
 const items = ref(["March", "April", "May", "June"]);
 
 const monthtable = ref([]);
+const usersData = ref([]);
 
 const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
+const getAllUsers = 'http://127.0.0.1:3333/api/v1/users/';
 const approveAPI = 'http://127.0.0.1:3333/api/v1/artwork/approve/';
 const rejectAPI = 'http://127.0.0.1:3333/api/v1/artwork/reject/';
 
 onMounted(async () => {
   try {
     const response = await axios.get(getAllArtworks);
+    const usersResponse = await axios.get(getAllUsers);
+
     monthtable.value = response.data;
+    usersData.value = usersResponse.data;
+
   } catch (error) {
     console.error('Error fetching artworks:', error);
   }
 });
 
+function getUserDetails(id: any) {
+  const userObj = usersData.value.find(item => item.id === id);
+
+  if(userObj) {
+    return `${userObj.name}  ${userObj.surname}`;
+  }
+}
 async function approve(id: any) {
-  await axios.put(approveAPI + id).then(() => {
-    alert(`Artwork approved successfully!`);
-  }).catch(error => {
-    alert(`Failed to approve artworks:${error}`);
-  })
+    await Swal.fire({
+      title: 'Approve Artwork?',
+      text: 'Are you sure you would like to approve this artwork?',
+      icon: 'question',
+      confirmButtonText: 'Yes, I am sure',
+      showCancelButton: true
+    }).then(async (result) => {
+      if (result.value) {
+        await axios.put(approveAPI + id).then(async () => {
+          await Swal.fire({
+            title: 'Artwork approved!',
+            text: 'Artwork approved Successfully',
+            icon: 'success',
+            confirmButtonText: 'Ok'
+          }).then(() => {
+            location.reload();
+          });
+        }).catch(error => {
+           Swal.fire({
+            title: 'Failed To Approve Artwork!',
+            text: error,
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          }).then(() => {
+            location.reload();
+           })
+        })
+      }
+    });
 }
 async function reject(id: any) {
-  await axios.put(rejectAPI+id).then(() => {
-    alert(`Artwork rejected successfully!`);
-  }).catch(error => {
-    alert(`Failed to rejected artworks:${error}`);
-  })
+  await Swal.fire({
+    title: 'Reject Artwork?',
+    text: 'Are you sure you would like to reject this artwork?',
+    icon: 'question',
+    confirmButtonText: 'Yes, I am sure',
+    showCancelButton: true
+  }).then(async (result) => {
+    if (result.value) {
+      await axios.put(rejectAPI + id).then(async () => {
+        await Swal.fire({
+          title: 'Artwork rejected!',
+          text: 'Artwork rejected Successfully',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+          location.reload();
+        });
+      }).catch(error => {
+        Swal.fire({
+          title: 'Failed To Reject Artwork!',
+          text: error,
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+          location.reload();
+        })
+      })
+    }
+  });
 }
 </script>
 
@@ -64,6 +126,7 @@ async function reject(id: any) {
               <th class="font-weight-medium text-subtitle-1">Artwork Name</th>
               <th class="font-weight-medium text-subtitle-1">Artwork Status</th>
               <th class="font-weight-medium text-subtitle-1">Price</th>
+              <th class="font-weight-medium text-subtitle-1">Bought By</th>
               <th class="font-weight-medium text-subtitle-1">Actionable Item</th>
             </tr>
           </thead>
@@ -76,7 +139,7 @@ async function reject(id: any) {
               <td>{{ item.id }}</td>
               <td>
                 <h4 class="font-weight-bold text-no-wrap">
-                  {{ item.name }}
+                  {{ getUserDetails(item.artist_id) }}
                 </h4>
               </td>
               <td>
@@ -85,8 +148,8 @@ async function reject(id: any) {
                     font-weight-medium
                     text-no-wrap text-body-2 text-grey-darken-1
                   "
-                >
-                  {{ item.name }}
+                >{{ item.name }}
+
                 </h5>
               </td>
               <td>
@@ -99,6 +162,9 @@ async function reject(id: any) {
               </td>
               <td>
                 <h4>R {{ item.price }}</h4>
+              </td>
+              <td>
+                <h4>{{ getUserDetails(item.bought_by) }}</h4>
               </td>
               <td>
                 <v-row>

@@ -127,6 +127,7 @@
 
 <script>
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default {
   data() {
@@ -165,12 +166,34 @@ export default {
           contact: this.contacts,
           password: this.password.value
         });
-        localStorage.setItem('role', response.data.data.user.role);
-        alert('User registered successfully');
+        await Swal.fire({
+          title: 'Create Account',
+          text: 'Account Created Successfully, Please Login',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+
+          location.href = "/auth/login";
+        });
       } catch (error) {
-        console.log('Registration failed:',
-          error.response ? error.response.data : error.message
-        );
+        const index =  error.response.data.error.message.lastIndexOf(':');
+
+        if (index !== -1) {
+          await Swal.fire({
+            title: 'Failed to Register!',
+            text:error.response.data.error.message.substring(index + 1).trim(),
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          });
+        } else {
+          await Swal.fire({
+            title: 'Failed to Register!',
+            text: 'Error Occurred while creating an account',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          });
+        }
+
       }
     },
     async login() {
@@ -178,9 +201,16 @@ export default {
         const response = await axios.post('http://127.0.0.1:3333/api/v1/auth/login', {
           email: this.email.value,
           password: this.password.value
-        })
+        });
 
-        const user =  response.data.data.user;
+        await Swal.fire({
+          title: 'Success Login!',
+          text: 'Login In Successfully',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        });
+
+        const user = response.data.data.user;
 
         localStorage.setItem('user', JSON.stringify(user));
         if(user.role === 'admin') {
@@ -189,7 +219,12 @@ export default {
           await this.$router.push('/ui-components/buttons');
         }
       } catch (error) {
-        alert(error.response.data.error);
+         await Swal.fire({
+          title: 'Failed to login!',
+          text: error.response.data.error,
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
       }
     },
     validateEmail(event) {
