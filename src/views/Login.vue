@@ -156,44 +156,52 @@ export default {
 
   methods: {
     async register() {
-      try {
-        const response = await axios.post(
-          'http://127.0.0.1:3333/api/v1/auth/register', {
-          name: this.firstName,
-          surname: this.lastName,
-          email: this.email.value,
-          role: (this.role === '' ? 'user' : 'artist'),
-          contact: this.contacts,
-          password: this.password.value
-        });
-        await Swal.fire({
-          title: 'Create Account',
-          text: 'Account Created Successfully, Please Login',
-          icon: 'success',
-          confirmButtonText: 'Ok'
-        }).then(() => {
-
-          location.href = "/auth/login";
-        });
-      } catch (error) {
-        const index =  error.response.data.error.message.lastIndexOf(':');
-
-        if (index !== -1) {
-          await Swal.fire({
-            title: 'Failed to Register!',
-            text:error.response.data.error.message.substring(index + 1).trim(),
-            icon: 'error',
-            confirmButtonText: 'Ok'
+      if(this.role !== ''){
+        try {
+          await axios.post(
+            'http://127.0.0.1:3333/api/v1/auth/register', {
+              name: this.firstName,
+              surname: this.lastName,
+              email: this.email.value,
+              role: (this.role === 'Buyer' ? 'user' : 'artist'),
+              contact: this.contacts,
+              password: this.password.value
+            }).then(() => {
+            Swal.fire({
+              title: 'Create Account',
+              text: 'Account Created Successfully, Please Login',
+              icon: 'success',
+              confirmButtonText: 'Ok'
+            }).then(() => {
+              location.href = "/auth/login";
+            });
           });
-        } else {
-          await Swal.fire({
-            title: 'Failed to Register!',
-            text: 'Error Occurred while creating an account',
-            icon: 'error',
-            confirmButtonText: 'Ok'
-          });
+        } catch (error) {
+          const index =  error.response.data.error.message.lastIndexOf(':');
+
+          if (index !== -1) {
+            await Swal.fire({
+              title: 'Failed to Register!',
+              text:error.response.data.error.message.substring(index + 1).trim(),
+              icon: 'error',
+              confirmButtonText: 'Ok'
+            });
+          } else {
+            await Swal.fire({
+              title: 'Failed to Register!',
+              text: 'Error Occurred while creating an account',
+              icon: 'error',
+              confirmButtonText: 'Ok'
+            });
+          }
         }
-
+      } else {
+       await Swal.fire({
+          title: 'Failed to Register!',
+          text: 'Role Cannot Be null, Please Select The Role',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
       }
     },
     async login() {
