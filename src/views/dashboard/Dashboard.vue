@@ -2,9 +2,7 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import TheSalesOverview from "./dashboardComponents/sales-overview/TheSalesOverview.vue";
-import DailyActivities from "./dashboardComponents/daily-activities/DailyActivities.vue";
 import ProductMonthTable from "./dashboardComponents/project-month-table/ProductMonthTable.vue";
-import BlogCard from "./dashboardComponents/blog-card/BlogCard.vue";
 
 function hasValidToken() {
   const token = localStorage.getItem('user');

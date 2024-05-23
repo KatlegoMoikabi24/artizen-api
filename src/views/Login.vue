@@ -106,7 +106,7 @@
             <v-select
               outlined
               v-model="role"
-              :items="['user', 'artist']"
+              :items="['Buyer', 'Artist']"
               label="Role"
               placeholder="Select role"
             ></v-select>
@@ -156,18 +156,21 @@ export default {
   methods: {
     async register() {
       try {
-        const response = await axios.post('http://127.0.0.1:3333/api/v1/auth/register', {
+        const response = await axios.post(
+          'http://127.0.0.1:3333/api/v1/auth/register', {
           name: this.firstName,
           surname: this.lastName,
           email: this.email.value,
-          role: this.role,
+          role: (this.role === '' ? 'user' : 'artist'),
           contact: this.contacts,
           password: this.password.value
         });
         localStorage.setItem('role', response.data.data.user.role);
         alert('User registered successfully');
       } catch (error) {
-        console.error('Registration failed:', error.response ? error.response.data : error.message);
+        console.log('Registration failed:',
+          error.response ? error.response.data : error.message
+        );
       }
     },
     async login() {
@@ -175,7 +178,7 @@ export default {
         const response = await axios.post('http://127.0.0.1:3333/api/v1/auth/login', {
           email: this.email.value,
           password: this.password.value
-        });
+        })
 
         const user =  response.data.data.user;
 

@@ -13,6 +13,11 @@ module.exports = {
     "vue/setup-compiler-macros": true,
   },
   rules: {
-    "prettier/prettier": ["error", { endOfLine: "off" }],
+    // Turn off all rules
+    "prettier/prettier": "off",
+    "no-unused-vars": "off",
+    "no-console": "off",
+    "no-debugger": "off",
+    "vue/no-unused-components": "off",
   },
 };

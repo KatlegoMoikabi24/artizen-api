@@ -10,6 +10,7 @@ onMounted(async () => {
 
   if(!user) {
     alert('Unauthorized Access, Please login');
+    return;
   } else {
     const isFirstLogin = localStorage.getItem('isFirstLogin');
 
@@ -37,19 +38,19 @@ async function action(item: any) {
       <LogoDark />
     </div>
 
-    <div class="scrollnavbar">
+    <div class="scrollnavbar" v-if="user">
       <v-list class="pa-4" color="transparent">
-        <template v-for="(item, i) in sidebarMenu" :key="i">
+        <template v-for="(item) in sidebarMenu" :key="i">
           <v-list-item
-            v-if="item.role === user.role || item.role === '*' "
+            v-if="item && (item.role === user.role || item.role === '*')"
             @click="action(item.to)"
             rounded="lg"
             class="mb-1"
           >
             <v-list-item-avatar start class="v-list-item-avatar--start">
-              <v-icon class="feather-sm v-icon v-icon--size-default">{{
-                item.icon
-              }}</v-icon>
+              <v-icon class="feather-sm v-icon v-icon--size-default">
+               {{item.icon}}
+              </v-icon>
             </v-list-item-avatar>
             <v-list-item-title v-text="item.title"></v-list-item-title>
           </v-list-item>
