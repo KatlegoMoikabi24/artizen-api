@@ -6,6 +6,7 @@ const artworks = ref([]);
 const imageApiUrl = 'http://127.0.0.1:3333/api/v1/artwork/image/';
 const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
 const getAllUsers = 'http://127.0.0.1:3333/api/v1/users/';
+const user = JSON.parse(<string>localStorage.getItem('user'));
 const usersData = ref([]);
 function getUserDetails(id: any) {
   const userObj = usersData.value.find(item => item.id === id);
@@ -62,7 +63,7 @@ onMounted(async () => {
             Pending Approval
           </v-btn>
           <v-btn
-            v-if="artwork.status === 'approved'"
+            v-if="artwork.status === 'approved' && user.role !== 'admin'"
             elevation="5"
             color="success"
             :to="'/ui-components/menus?art='+artwork.id"
