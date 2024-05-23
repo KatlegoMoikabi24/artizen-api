@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import Swal from "sweetalert2";
 
 const artworks = ref([]);
 const imageApiUrl = 'http://127.0.0.1:3333/api/v1/artwork/image/';
 const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
 const getAllUsers = 'http://127.0.0.1:3333/api/v1/users/';
+const approveAPI = 'http://127.0.0.1:3333/api/v1/artwork/approve/';
+const rejectAPI = 'http://127.0.0.1:3333/api/v1/artwork/reject/';
 const usersData = ref([]);
 function getUserDetails(id: any) {
   const userObj = usersData.value.find(item => item.id === id);
@@ -14,6 +17,71 @@ function getUserDetails(id: any) {
     return `${userObj.name}  ${userObj.surname}`;
   }
 }
+async function approve(id: any) {
+  await Swal.fire({
+    title: 'Approve Artwork?',
+    text: 'Are you sure you would like to approve this artwork?',
+    icon: 'question',
+    confirmButtonText: 'Yes, I am sure',
+    showCancelButton: true
+  }).then(async (result) => {
+    if (result.value) {
+      await axios.put(approveAPI + id).then(async () => {
+        await Swal.fire({
+          title: 'Artwork approved!',
+          text: 'Artwork approved Successfully',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+          location.reload();
+        });
+      }).catch(error => {
+        Swal.fire({
+          title: 'Failed To Approve Artwork!',
+          text: error,
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+          location.reload();
+        })
+      })
+    }
+  });
+}
+
+async function reject(id: any) {
+  await Swal.fire({
+    title: 'Reject Artwork?',
+    text: 'Are you sure you would like to reject this artwork?',
+    icon: 'question',
+    confirmButtonText: 'Yes, I am sure',
+    showCancelButton: true
+  }).then(async (result) => {
+    if (result.value) {
+      await axios.put(rejectAPI + id).then(async () => {
+        await Swal.fire({
+          title: 'Artwork rejected!',
+          text: 'Artwork rejected Successfully',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+          location.reload();
+        });
+      }).catch(error => {
+        Swal.fire({
+          title: 'Failed To Reject Artwork!',
+          text: error,
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        }).then(() => {
+          location.reload();
+        })
+      })
+    }
+  });
+}
+
+
 onMounted(async () => {
   try {
     const response = await axios.get(getAllArtworks);
@@ -52,24 +120,23 @@ onMounted(async () => {
           <b>Status: </b> {{( artwork.status === '' ? 'Rejected' :  artwork.status.toUpperCase()) }}
           <br>
           <br>
-          <v-btn
-            block
-            v-if="artwork.status === ''"
-            depressed color="info"
-          >Approve</v-btn>
 
           <v-btn
-            v-if="artwork.status === 'pending'"
+            :disabled="artwork.status === 'approved'  || artwork.status === 'sold'"
             depressed color="info"
+            elevation="6"
+            @click="approve(artwork.id)"
             block
           >
             Approve
           </v-btn>
 
           <v-btn
-            v-if="artwork.status === 'pending'"
             class="mt-2"
-            depressed color="error"
+            elevation="8"
+            :disabled="artwork.status === ''  || artwork.status === 'sold'"
+            color="error"
+            @click="reject(artwork.id)"
             block
           >
             Reject
