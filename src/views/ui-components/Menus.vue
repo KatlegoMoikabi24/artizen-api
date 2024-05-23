@@ -205,13 +205,27 @@ function handlePaymentSubmit() {
 }
 
 async function buyArtwork() {
-  if(cvv.value === '' || cardNumber.value === '' || expiryDate.value  === '') {
+  if(cvv.value.length !== 3) {
     await Swal.fire({
-      title: 'Invalid Card Details!',
-      text: 'Please enter all card details',
+      title: 'Invalid CVV Number!',
+      text: 'Please enter Valid 3 Digits',
       icon: 'error',
       confirmButtonText: 'Ok'
     })
+  } else if(cardNumber.value.length < 8 || cardNumber.value.length > 19){
+    await Swal.fire({
+      title: 'Invalid Card Number!',
+      text: 'Please enter numbers between 8 to 19 digits',
+      icon: 'error',
+      confirmButtonText: 'Ok'
+    });
+  } else if(!/^\d{2}\/\d{2}$/.test(expiryDate.value)){
+    await Swal.fire({
+      title: 'Invalid Expiry Date!',
+      text: 'Please enter a valid expiry date in the format MM/YY',
+      icon: 'error',
+      confirmButtonText: 'Ok'
+    });
   } else {
     try {
       await Swal.fire({
