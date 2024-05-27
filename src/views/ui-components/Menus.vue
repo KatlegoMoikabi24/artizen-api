@@ -144,6 +144,7 @@ import BaseCard from '@/components/BaseCard.vue';
 import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const cardNumber = ref<string>('');
 const expiryDate = ref<string>('');
@@ -155,11 +156,12 @@ const route = useRoute();
 const cartItems = ref([]);
 
 const paymentHistory = ref([]);
-const getArtwork = 'http://127.0.0.1:3333/api/v1/artwork/';
-const buyArtworkAPI = 'http://127.0.0.1:3333/api/v1/artwork/buy/';
-const getPaymentsAPI = 'http://127.0.0.1:3333/api/v1/payments/user/';
-const getAllPaymentsAPI = 'http://127.0.0.1:3333/api/v1/payments/';
-const getAllUsers = 'http://127.0.0.1:3333/api/v1/users/';
+
+const getArtwork = `${API_URL}artwork/`;
+const buyArtworkAPI = `${API_URL}artwork/buy/`;
+const getPaymentsAPI = `${API_URL}payments/user/`;
+const getAllPaymentsAPI = `${API_URL}payments/`;
+const getAllUsers = `${API_URL}users/`;
 const usersData = ref([]);
 
 let artId = ref('');

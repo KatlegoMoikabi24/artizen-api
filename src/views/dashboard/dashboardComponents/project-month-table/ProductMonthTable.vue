@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from "axios";
 import Swal from "sweetalert2";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const select = ref("March");
 const items = ref(["March", "April", "May", "June"]);
@@ -9,10 +10,11 @@ const items = ref(["March", "April", "May", "June"]);
 const monthtable = ref([]);
 const usersData = ref([]);
 
-const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
-const getAllUsers = 'http://127.0.0.1:3333/api/v1/users/';
-const approveAPI = 'http://127.0.0.1:3333/api/v1/artwork/approve/';
-const rejectAPI = 'http://127.0.0.1:3333/api/v1/artwork/reject/';
+const getAllArtworks = `${API_URL}artwork/`;
+const getAllUsers = `${API_URL}users/`;
+const approveAPI = `${API_URL}artwork/approve/`;
+const rejectAPI = `${API_URL}artwork/reject/`;
+
 
 onMounted(async () => {
   try {

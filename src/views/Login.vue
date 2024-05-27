@@ -128,6 +128,7 @@
 <script>
 import axios from "axios";
 import Swal from "sweetalert2";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default {
   data() {
@@ -159,7 +160,7 @@ export default {
       if(this.role !== ''){
         try {
           await axios.post(
-            'http://127.0.0.1:3333/api/v1/auth/register', {
+            `${API_URL}auth/register`, {
               name: this.firstName,
               surname: this.lastName,
               email: this.email.value,
@@ -177,15 +178,15 @@ export default {
             });
           });
         } catch (error) {
-          const index =  error.response.data.error.message.lastIndexOf(':');
+          let errorMessage = 'Error Occurred while creating an account';
 
-          if (index !== -1) {
-            await Swal.fire({
-              title: 'Failed to Register!',
-              text:error.response.data.error.message.substring(index + 1).trim(),
-              icon: 'error',
-              confirmButtonText: 'Ok'
-            });
+
+          if (error.response && error.response.data && error.response.data.error) {
+            const message = error.response.data.error.message;
+            const index = message.lastIndexOf(':');
+            if (index !== -1) {
+              errorMessage = message.substring(index + 1).trim();
+            }
           } else {
             await Swal.fire({
               title: 'Failed to Register!',
@@ -206,7 +207,8 @@ export default {
     },
     async login() {
       try {
-        const response = await axios.post('http://127.0.0.1:3333/api/v1/auth/login', {
+        console.log(`${API_URL}`);
+        const response = await axios.post(`${API_URL}auth/login`, {
           email: this.email.value,
           password: this.password.value
         });

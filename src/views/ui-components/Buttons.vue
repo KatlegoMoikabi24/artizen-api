@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+const API_URL = import.meta.env.VITE_API_URL;
 
+// Define your API endpoints using the base URL
+const imageApiUrl = `${API_URL}artwork/image/`;
+const getByArtistId = `${API_URL}artwork/artist/`;
+const deleteArtworkAPI = `${API_URL}artwork/`;
+const getAllArtworks = `${API_URL}artwork/`;
+const getAllUsers = `${API_URL}users/`;
+const approveAPI = `${API_URL}artwork/approve/`;
+const rejectAPI = `${API_URL}artwork/reject/`;
 const artworks = ref([]);
-const imageApiUrl = 'http://127.0.0.1:3333/api/v1/artwork/image/';
-const getAllArtworks = 'http://127.0.0.1:3333/api/v1/artwork/';
-const getAllUsers = 'http://127.0.0.1:3333/api/v1/users/';
 const user = JSON.parse(<string>localStorage.getItem('user'));
 const usersData = ref([]);
 function getUserDetails(id: any) {

@@ -79,13 +79,15 @@
 import { ref, onMounted } from 'vue';
 import BaseCard from "@/components/BaseCard.vue";
 import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const imageUrl = ref<string | null>(null);
 const artworks = ref([]);
 const userDetails = ref({});
-const imageApiUrl = 'http://127.0.0.1:3333/api/v1/artwork/image/';
-const getByArtistId = 'http://127.0.0.1:3333/api/v1/artwork/artist/';
-const deleteArtworkAPI = 'http://127.0.0.1:3333/api/v1/artwork/';
+// Define your API endpoints using the base URL
+const imageApiUrl = `${API_URL}artwork/image/`;
+const getByArtistId = `${API_URL}artwork/artist/`;
+const deleteArtworkAPI = `${API_URL}artwork/`;
 
 const artwork = ref({
   id: 1,
@@ -143,7 +145,7 @@ async function upload() {
   formData.append('artist_id',user.id);
   formData.append('picture', selectedFile.value);
   try {
-    await axios.post('http://127.0.0.1:3333/api/v1/artwork', formData, {
+    await axios.post(`${API_URL}artwork`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
