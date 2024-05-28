@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'http://127.0.0.1:3333/api/v1/';
 
 const select = ref("March");
 const items = ref(["March", "April", "May", "June"]);
@@ -17,7 +17,10 @@ const rejectAPI = `${API_URL}artwork/reject/`;
 
 
 onMounted(async () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+  console.log(API_URL);
   try {
+    console.log(API_URL);
     const response = await axios.get(getAllArtworks);
     const usersResponse = await axios.get(getAllUsers);
 

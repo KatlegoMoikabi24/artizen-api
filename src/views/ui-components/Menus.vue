@@ -144,7 +144,7 @@ import BaseCard from '@/components/BaseCard.vue';
 import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'http://127.0.0.1:3333/api/v1/';
 
 const cardNumber = ref<string>('');
 const expiryDate = ref<string>('');

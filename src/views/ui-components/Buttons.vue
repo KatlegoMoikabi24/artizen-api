@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = "http://127.0.0.1:3333/api/v1/";
 
 // Define your API endpoints using the base URL
 const imageApiUrl = `${API_URL}artwork/image/`;
@@ -23,6 +23,7 @@ function getUserDetails(id: any) {
 }
 onMounted(async () => {
   try {
+
     const response = await axios.get(getAllArtworks);
     const usersResponse = await axios.get(getAllUsers);
 
@@ -30,7 +31,8 @@ onMounted(async () => {
     usersData.value = usersResponse.data;
 
   } catch (error) {
-    alert(error);
+    console.log(import.meta.env);
+    // alert(error);
   }
 });
 </script>
@@ -52,13 +54,16 @@ onMounted(async () => {
         />
         <v-card-text>
           <h5 class="title font-weight-medium mb-2 text-h6">{{ artwork.name }}</h5>
-          <h5 class="title font-weight-medium mb-2 text-h6"> R {{ artwork.price }}</h5>
+          <h5 class="title font-weight-medium mb-2 text-h6">Current Bid: R {{ artwork.price }}</h5>
           <p class="mb-3">
             Artwork Designed by - {{ getUserDetails(artwork.artist_id) }}
           </p>
+          <br>
           <b>Status: </b> {{ artwork.status.toUpperCase() }}
-          <br>
-          <br>
+          <br> <br>
+          <b>Time Left: </b> {{ artwork.status.toUpperCase() }}
+
+          <br><br>
           <v-btn block v-if="artwork.status === ''" depressed color="error" disabled>Rejected</v-btn>
           <v-btn
             v-if="artwork.status === 'pending'"

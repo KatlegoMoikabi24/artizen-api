@@ -94,11 +94,13 @@
               class="w100"
               placeholder="Password"
               v-model="password.value"
+              minlength="5"
+              required
             />
             <input
               type="text"
               class="w100"
-              placeholder="Contacts"
+              placeholder="Contact Numbers"
               v-model="contacts"
             />
 
@@ -128,7 +130,7 @@
 <script>
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'http://127.0.0.1:3333/api/v1/';
 
 export default {
   data() {
@@ -164,7 +166,7 @@ export default {
               name: this.firstName,
               surname: this.lastName,
               email: this.email.value,
-              role: (this.role === 'Buyer' ? 'user' : 'artist'),
+              role: (this.role === 'Buyer' ? 'buyer' : 'artist'),
               contact: this.contacts,
               password: this.password.value
             }).then(() => {
@@ -180,21 +182,20 @@ export default {
         } catch (error) {
           let errorMessage = 'Error Occurred while creating an account';
 
-
           if (error.response && error.response.data && error.response.data.error) {
             const message = error.response.data.error.message;
             const index = message.lastIndexOf(':');
             if (index !== -1) {
               errorMessage = message.substring(index + 1).trim();
             }
-          } else {
-            await Swal.fire({
-              title: 'Failed to Register!',
-              text: 'Error Occurred while creating an account',
-              icon: 'error',
-              confirmButtonText: 'Ok'
-            });
           }
+
+          await Swal.fire({
+            title: 'Failed to Register!',
+            text: errorMessage,
+            icon: 'error',
+            confirmButtonText: 'Ok'
+          });
         }
       } else {
        await Swal.fire({
@@ -207,8 +208,7 @@ export default {
     },
     async login() {
       try {
-        console.log(`${API_URL}`);
-        const response = await axios.post(`${API_URL}auth/login`, {
+        const response = await axios.post(`http://127.0.0.1:3333/api/v1/auth/login`, {
           email: this.email.value,
           password: this.password.value
         });
@@ -242,7 +242,7 @@ export default {
     },
 
     validatePassword(event) {
-      this.password.error = this.password.value === "";
+      this.password.error = this.password.value <= 5;
     }
   },
 
@@ -264,7 +264,7 @@ export default {
     },
 
     passwordValid() {
-      return this.password.value.length > 0;
+      return this.password.value.length > 5;
     },
 
     loginValid() {

@@ -7,11 +7,10 @@
         </v-text-field>
 
         ArtWork Price
-        <v-text-field v-model="artwork.price">
-        </v-text-field>
-
-        ArtWork Description
-        <v-text-field>
+        <v-text-field
+          type="number"
+          label="Price"
+          v-model="artwork.price">
         </v-text-field>
 
         <v-file-input
@@ -79,7 +78,8 @@
 import { ref, onMounted } from 'vue';
 import BaseCard from "@/components/BaseCard.vue";
 import axios from "axios";
-const API_URL = import.meta.env.VITE_API_URL;
+import Swal from "sweetalert2";
+const API_URL = 'http://127.0.0.1:3333/api/v1/';
 
 const imageUrl = ref<string | null>(null);
 const artworks = ref([]);
@@ -135,26 +135,45 @@ async function upload() {
   const user = JSON.parse(<string>localStorage.getItem('user'));
 
   if (!selectedFile.value) {
-    alert('Please select a file');
+    await Swal.fire({
+      title: 'Upload Error!',
+      text: 'Please Select A File',
+      icon: 'error',
+      confirmButtonText: 'Ok'
+    });
     return;
   }
 
-  const formData = new FormData();
-  formData.append('name', artwork.value.name);
-  formData.append('price', artwork.value.price);
-  formData.append('artist_id',user.id);
-  formData.append('picture', selectedFile.value);
-  try {
-    await axios.post(`${API_URL}artwork`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    }).then(() => {
-      alert('Artwork uploaded successfully, your artwork will be reviewed');
-      window.location.reload();
+  if(artworks.value.find(item => item.name === artwork.value.name)){
+    await Swal.fire({
+      title: 'Artwork Already Exist!',
+      text: 'Please Select Another File or Change its name',
+      icon: 'error',
+      confirmButtonText: 'Ok'
     });
-  } catch (error) {
-    console.error('Upload failed', error);
+  } else {
+    const formData = new FormData();
+    formData.append('name', artwork.value.name);
+    formData.append('price', artwork.value.price);
+    formData.append('artist_id',user.id);
+    formData.append('picture', selectedFile.value);
+    try {
+      await axios.post(`${API_URL}artwork`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(async () => {
+        await Swal.fire({
+          title: 'Artwork Uploaded!',
+          text: 'Your Artwork Will be Reviewed',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        });
+        window.location.reload();
+      });
+    } catch (error) {
+      alert(error)
+    }
   }
 }
 </script>
