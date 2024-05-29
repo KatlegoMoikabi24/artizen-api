@@ -3,9 +3,12 @@ import { ref, onMounted } from 'vue';
 import sidebarItems from "./sidebarItem";
 import LogoDark from "../logo/LogoDark.vue";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const sidebarMenu = ref(sidebarItems);
 const user = JSON.parse(<string>localStorage.getItem('user'));
+const API_URL = "http://127.0.0.1:3333/api/v1/";
+const getAllArtworks = `${API_URL}artwork/`;
 
 onMounted(async () => {
 
@@ -24,6 +27,21 @@ onMounted(async () => {
       localStorage.setItem('isFirstLogin', 'false');
 
       location.reload();
+    }
+
+    const user = JSON.parse(<string>localStorage.getItem('user'));
+    if(user.role === 'admin'){
+      const { data } = await axios.get(getAllArtworks);
+
+      
+      if(data.filter(items => items.status === 'pending')){
+        await Swal.fire({
+          title: 'New Artwork',
+          text: 'Artwork Named Requires Your Attention!',
+          icon: 'warning',
+          confirmButtonText: 'Ok'
+        });
+      }
     }
   }
 });

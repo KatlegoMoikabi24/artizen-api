@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
+
 const API_URL = 'http://127.0.0.1:3333/api/v1/';
 
 const select = ref("March");
@@ -15,12 +17,66 @@ const getAllUsers = `${API_URL}users/`;
 const approveAPI = `${API_URL}artwork/approve/`;
 const rejectAPI = `${API_URL}artwork/reject/`;
 
+function exportReport() {
+  try {
+    const worksheet = XLSX.utils.json_to_sheet(monthtable.value);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Artwork Reports');
+
+    XLSX.writeFile(workbook, 'artwork-report.xlsx');
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Downloaded Artwork Reports',
+      text: 'Successfully download artwork reports',
+      showLoaderOnConfirm: true,
+    });
+  }catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error Occurred',
+      text: 'Failed to Download Artwork Reports',
+      showLoaderOnConfirm: true,
+    });
+  }
+}
+function exportCsv() {
+  try {
+
+    const worksheet = XLSX.utils.json_to_sheet(monthtable.value);
+    const csv = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "artwork-report.csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Downloaded Artwork Reports',
+      text: 'Successfully download artwork reports',
+      showLoaderOnConfirm: true,
+    });
+  }catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error Occurred',
+      text: 'Failed to Download Artwork Reports',
+      showLoaderOnConfirm: true,
+    });
+  }
+}
 
 onMounted(async () => {
   const API_URL = import.meta.env.VITE_API_URL;
-  console.log(API_URL);
   try {
-    console.log(API_URL);
     const response = await axios.get(getAllArtworks);
     const usersResponse = await axios.get(getAllUsers);
 
@@ -114,8 +170,8 @@ async function reject(id: any) {
         <v-spacer></v-spacer>
         <div class="ml-auto">
           <v-row>
-            <v-btn elevation="7">Export to Excel</v-btn>
-            <v-btn class="ml-2" color="default" elevation="5">Export to CSV</v-btn>
+            <v-btn elevation="7" @click="exportReport">Export to Excel</v-btn>
+            <v-btn class="ml-2" @click="exportCsv" color="default" elevation="5">Export to CSV</v-btn>
           </v-row>
         </div>
       </div>

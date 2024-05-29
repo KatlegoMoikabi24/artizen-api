@@ -26,12 +26,13 @@ function getUserDetails(id: number) {
 
 function startCountdown(artwork: any) {
   const createdAt = moment(artwork.created_at);
-  const expiresAt = createdAt.add(1, 'hour');
+  const expiresAt = createdAt.add(1, 'minutes');
 
   const updateCountdown = () => {
     const now = moment();
     const duration = moment.duration(expiresAt.diff(now));
-    if (duration.asSeconds() <= 0) {
+
+    if (duration.asSeconds() <= 0 && artwork.status === 'approved') {
       countdowns.value[artwork.id] = 'Bought';
     } else {
       countdowns.value[artwork.id] = `${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`;
