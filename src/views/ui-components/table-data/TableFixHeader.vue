@@ -55,6 +55,7 @@ onMounted(getAllUsers);
           <th class="text-left">Surname</th>
           <th class="text-left">Email</th>
           <th class="text-left">User Role</th>
+          <th class="text-left">Phone Numbers</th>
           <th class="text-left">Actionable Item</th>
         </tr>
         </thead>
@@ -70,13 +71,14 @@ onMounted(getAllUsers);
             <v-text-field v-model="user.email" dense hide-details></v-text-field>
           </td>
           <td>
-            <v-select
+            <v-text-field
               :items="roles"
               v-model="user.role"
               dense
               hide-details
               solo
-            ></v-select>
+              disabled
+            ></v-text-field>
           </td>
           <td>
             <v-text-field v-model="user.contacts" dense hide-details type="Phone Number"></v-text-field>

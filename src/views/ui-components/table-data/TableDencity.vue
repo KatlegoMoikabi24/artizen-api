@@ -52,7 +52,7 @@ onMounted(async () => {
 <template>
   <div>
     <p class="text-subtitle-1 text-grey-darken-1">
-      Change or manage user Role
+      Change or Manage User Roles
     </p>
     <div class="mt-4">
       <v-table density="compact">

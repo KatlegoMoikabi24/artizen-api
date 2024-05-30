@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import BaseCard from "@/components/BaseCard.vue";
 
+import BaseCard from "@/components/BaseCard.vue";
 import TableDencity from "./table-data/TableDencity.vue";
 import TableFixHeader from "./table-data/TableFixHeader.vue";
+
+const userProfile = JSON.parse(<string> localStorage.getItem('user'))
+const isAdmin = userProfile.role === 'admin';
 
 </script>
 
@@ -15,16 +17,11 @@ import TableFixHeader from "./table-data/TableFixHeader.vue";
           <TableFixHeader />
         </BaseCard>
       </v-col>
-      <v-col cols="12" sm="12">
+      <v-col cols="12" sm="12" v-if="isAdmin">
         <BaseCard heading="Role Management">
           <TableDencity />
         </BaseCard>
       </v-col>
-<!--      <v-col cols="12" sm="12">-->
-<!--        <BaseCard heading="Height">-->
-<!--          <TableFixHeight />-->
-<!--        </BaseCard>-->
-<!--      </v-col>-->
     </v-row>
   </v-container>
 </template>
