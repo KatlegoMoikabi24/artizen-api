@@ -4,8 +4,15 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 
-const API_URL = 'http://127.0.0.1:3333/api/v1/';
-
+const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 const select = ref("March");
 const items = ref(["March", "April", "May", "June"]);
 
@@ -75,10 +82,9 @@ function exportCsv() {
 }
 
 onMounted(async () => {
-  const API_URL = import.meta.env.VITE_API_URL;
   try {
-    const response = await axios.get(getAllArtworks);
-    const usersResponse = await axios.get(getAllUsers);
+    const response = await axiosInstance.get(getAllArtworks);
+    const usersResponse = await axiosInstance.get(getAllUsers);
 
     monthtable.value = response.data;
     usersData.value = usersResponse.data;
@@ -104,7 +110,7 @@ async function approve(id: any) {
       showCancelButton: true
     }).then(async (result) => {
       if (result.value) {
-        await axios.put(approveAPI + id).then(async () => {
+        await axiosInstance.put(approveAPI + id).then(async () => {
           await Swal.fire({
             title: 'Artwork approved!',
             text: 'Artwork approved Successfully',
@@ -135,7 +141,7 @@ async function reject(id: any) {
     showCancelButton: true
   }).then(async (result) => {
     if (result.value) {
-      await axios.put(rejectAPI + id).then(async () => {
+      await axiosInstance.put(rejectAPI + id).then(async () => {
         await Swal.fire({
           title: 'Artwork rejected!',
           text: 'Artwork rejected Successfully',

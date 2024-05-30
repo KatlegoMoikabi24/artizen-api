@@ -4,7 +4,15 @@ import axios from 'axios';
 import moment from "moment";
 import Swal from "sweetalert2";
 
-const API_URL = "http://127.0.0.1:3333/api/v1/";
+const API_URL = "https://bunny-growing-anemone.ngrok-free.app/api/v1/";
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 
 const imageApiUrl = `${API_URL}artwork/image/`;
 const getAllArtworks = `${API_URL}artwork/`;
@@ -44,8 +52,8 @@ function startCountdown(artwork: any) {
 }
 onMounted(async () => {
   try {
-    const response = await axios.get(getAllArtworks);
-    const usersResponse = await axios.get(getAllUsers);
+    const response = await axiosInstance.get(getAllArtworks);
+    const usersResponse = await axiosInstance.get(getAllUsers);
     artworks.value = response.data.filter(item => item.status !== '');
     usersData.value = usersResponse.data;
 
@@ -81,7 +89,7 @@ async function placeBid(artwork: any) {
       showCancelButton: true
     }).then(async (result) => {
       if (result.value) {
-        await axios.post(placeBidAPI + artwork.id, {
+        await axiosInstance.post(placeBidAPI + artwork.id, {
           bought_by: user.id,
           price: bidAmount,
         }).then(() => {

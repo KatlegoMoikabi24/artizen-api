@@ -144,8 +144,15 @@ import BaseCard from '@/components/BaseCard.vue';
 import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = 'http://127.0.0.1:3333/api/v1/';
-
+const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 const cardNumber = ref<string>('');
 const expiryDate = ref<string>('');
 const cvv = ref<string>('');
@@ -176,13 +183,13 @@ function getUserDetails(id: any) {
 }
 onMounted(async () => {
   try {
-    const usersResponse = await axios.get(getAllUsers);
+    const usersResponse = await axiosInstance.get(getAllUsers);
     usersData.value = usersResponse.data;
 
     if (route.query.art) {
       artId = route.query.art;
 
-      const response = await axios.get(getArtwork + artId);
+      const response = await axiosInstance.get(getArtwork + artId);
 
       onBuy.value = true;
       totalAmount = response.data.price;
@@ -192,7 +199,7 @@ onMounted(async () => {
       onBuy.value = false;
     }
 
-    const payments_response = await axios.get((user.role === 'admin' ? getAllPaymentsAPI : getPaymentsAPI + user.id));
+    const payments_response = await axiosInstance.get((user.role === 'admin' ? getAllPaymentsAPI : getPaymentsAPI + user.id));
     paymentHistory.value = payments_response.data;
   } catch (error) {
     alert('Error Occurred : ' + error);
@@ -238,7 +245,7 @@ async function buyArtwork() {
         showCancelButton: true
       }).then(async (result) => {
         if (result.value) {
-          await axios.put(buyArtworkAPI + artId, {
+          await axiosInstance.put(buyArtworkAPI + artId, {
             bought_by: user.id,
           }).then(() => {
             onBuy.value = false;

@@ -8,9 +8,16 @@ const dialog = ref(false);
 const selectedUser = ref(null);
 const selectedRole = ref('');
 
-const API_URL = 'http://127.0.0.1:3333/api/v1/';
+const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
 const getAllUsers = `${API_URL}users/`;
-
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 const openDialog = (user:any) => {
   selectedUser.value = user;
   selectedRole.value = user.role;
@@ -21,7 +28,7 @@ const updateRole = async () => {
   if (selectedUser.value) {
 
     try {
-      await axios.put(`${API_URL}users/role/${selectedUser.value.id}`, {
+      await axiosInstance.put(`${API_URL}users/role/${selectedUser.value.id}`, {
         role: selectedRole.value.toLowerCase(),
       });
       selectedUser.value.role = selectedRole.value;
@@ -34,7 +41,7 @@ const updateRole = async () => {
 
 onMounted(async () => {
   try {
-    const usersResponse = await axios.get(getAllUsers);
+    const usersResponse = await axiosInstance.get(getAllUsers);
     usersData.value = usersResponse.data;
   } catch (error) {
     console.error('Error fetching users:', error);

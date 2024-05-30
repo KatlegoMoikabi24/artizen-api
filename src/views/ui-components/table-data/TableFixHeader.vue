@@ -4,11 +4,18 @@ import axios from "axios";
 
 const usersData = ref([]);
 const roles = ['Buyer', 'Artist'];
-const API_URL = 'http://127.0.0.1:3333/api/v1/';
-
+const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 const getAllUsers = async () => {
   try {
-    const response = await axios.get(`${API_URL}users/`);
+    const response = await axiosInstance.get(`${API_URL}users/`);
     usersData.value = response.data;
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -17,7 +24,7 @@ const getAllUsers = async () => {
 
 const updateUser = async (user:any) => {
   try {
-    await axios.put(`${API_URL}users/${user.id}`, {
+    await axiosInstance.put(`${API_URL}users/${user.id}`, {
       name: user.name,
       surname: user.surname,
       email: user.email,

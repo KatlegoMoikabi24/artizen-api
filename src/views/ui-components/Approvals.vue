@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from "sweetalert2";
-const API_URL = 'http://127.0.0.1:3333/api/v1/';
+const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
 
 const artworks = ref([]);
 const imageApiUrl = `${API_URL}artwork/image/`;
@@ -11,6 +11,14 @@ const getAllUsers = `${API_URL}users/`;
 const approveAPI = `${API_URL}artwork/approve/`;
 const rejectAPI = `${API_URL}artwork/reject/`;
 
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 const usersData = ref([]);
 function getUserDetails(id: any) {
   const userObj = usersData.value.find(item => item.id === id);
@@ -28,7 +36,7 @@ async function approve(id: any) {
     showCancelButton: true
   }).then(async (result) => {
     if (result.value) {
-      await axios.put(approveAPI + id).then(async () => {
+      await axiosInstance.put(approveAPI + id).then(async () => {
         await Swal.fire({
           title: 'Artwork approved!',
           text: 'Artwork approved Successfully',
@@ -60,7 +68,7 @@ async function reject(id: any) {
     showCancelButton: true
   }).then(async (result) => {
     if (result.value) {
-      await axios.put(rejectAPI + id).then(async () => {
+      await axiosInstance.put(rejectAPI + id).then(async () => {
         await Swal.fire({
           title: 'Artwork rejected!',
           text: 'Artwork rejected Successfully',
@@ -86,8 +94,8 @@ async function reject(id: any) {
 
 onMounted(async () => {
   try {
-    const response = await axios.get(getAllArtworks);
-    const usersResponse = await axios.get(getAllUsers);
+    const response = await axiosInstance.get(getAllArtworks);
+    const usersResponse = await axiosInstance.get(getAllUsers);
 
     artworks.value = response.data;
     usersData.value = usersResponse.data;
