@@ -84,11 +84,18 @@ const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
 const imageUrl = ref<string | null>(null);
 const artworks = ref([]);
 const userDetails = ref({});
-// Define your API endpoints using the base URL
+
 const imageApiUrl = `${API_URL}artwork/image/`;
 const getByArtistId = `${API_URL}artwork/artist/`;
 const deleteArtworkAPI = `${API_URL}artwork/`;
-
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 const artwork = ref({
   id: 1,
   name: '',
@@ -99,8 +106,8 @@ const artwork = ref({
 });
 const selectedFile = ref<File | null>(null);
 
-async function deleteArtwork(item) {
-  const response = await axios.delete(deleteArtworkAPI + item.id);
+async function deleteArtwork(item:any) {
+  const response = await axiosInstance.delete(deleteArtworkAPI + item.id);
 
   alert(response.data.message);
 }
@@ -121,7 +128,7 @@ function handleFileUpload(event: Event) {
 onMounted(async () => {
   try {
     const user = JSON.parse(<string>localStorage.getItem('user'));
-    const response = await axios.get(getByArtistId + user.id);
+    const response = await axiosInstance.get(getByArtistId + user.id);
 
     artworks.value = response.data.artworks;
     userDetails.value = response.data.user;
@@ -158,7 +165,7 @@ async function upload() {
     formData.append('artist_id',user.id);
     formData.append('picture', selectedFile.value);
     try {
-      await axios.post(`${API_URL}artwork`, formData, {
+      await axiosInstance.post(`${API_URL}artwork`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

@@ -9,7 +9,14 @@ const sidebarMenu = ref(sidebarItems);
 const user = JSON.parse(<string>localStorage.getItem('user'));
 const API_URL = "https://bunny-growing-anemone.ngrok-free.app/api/v1/";
 const getAllArtworks = `${API_URL}artwork/`;
-
+const axiosInstance = axios.create({
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
+});
 onMounted(async () => {
 
   if(!user) {
@@ -31,7 +38,7 @@ onMounted(async () => {
 
     const user = JSON.parse(<string>localStorage.getItem('user'));
     if(user.role === 'admin'){
-      const { data } = await axios.get(getAllArtworks);
+      const { data } = await axiosInstance.get(getAllArtworks);
       
       if(data.filter(items => items.status === 'pending').length > 0){
         await Swal.fire({

@@ -5,6 +5,9 @@ import axios from "axios";
 const usersData = ref([]);
 const roles = ['Buyer', 'Artist'];
 const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const userProfile = JSON.parse(<string> localStorage.getItem('user'))
+const isAdmin = userProfile.role === 'admin';
+
 const axiosInstance = axios.create({
   headers: {
     'ngrok-skip-browser-warning': 'true',
@@ -15,8 +18,14 @@ const axiosInstance = axios.create({
 });
 const getAllUsers = async () => {
   try {
-    const response = await axiosInstance.get(`${API_URL}users/`);
-    usersData.value = response.data;
+    if(!isAdmin) {
+      const response = await axiosInstance.get(`${API_URL}users/${userProfile.id}`);
+      usersData.value.push(response.data);
+    } else {
+      const response = await axiosInstance.get(`${API_URL}users/`);
+      usersData.value = response.data;
+    }
+
   } catch (error) {
     console.error('Error fetching users:', error);
   }
@@ -24,7 +33,7 @@ const getAllUsers = async () => {
 
 const updateUser = async (user:any) => {
   try {
-    await axiosInstance.put(`${API_URL}users/${user.id}`, {
+    await axiosInstance.post(`${API_URL}users/${user.id}`, {
       name: user.name,
       surname: user.surname,
       email: user.email,

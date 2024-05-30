@@ -28,7 +28,7 @@ const updateRole = async () => {
   if (selectedUser.value) {
 
     try {
-      await axiosInstance.put(`${API_URL}users/role/${selectedUser.value.id}`, {
+      await axiosInstance.post(`${API_URL}users/role/${selectedUser.value.id}`, {
         role: selectedRole.value.toLowerCase(),
       });
       selectedUser.value.role = selectedRole.value;
