@@ -16,9 +16,7 @@ onMounted(() => {
 
 <template>
   <v-app>
-    <!-- ---------------------------------------------- -->
-    <!---Sidebar -->
-    <!-- ---------------------------------------------- -->
+
     <v-navigation-drawer
       left
       :permanent="$vuetify.display.mdAndUp"
@@ -30,21 +28,14 @@ onMounted(() => {
     >
       <SidebarVue />
     </v-navigation-drawer>
-    <!-- ---------------------------------------------- -->
-    <!---Header -->
-    <!-- ---------------------------------------------- -->
+
+
     <v-app-bar elevation="0" class="v-topbar">
       <v-app-bar-nav-icon class="hidden-md-and-up" @click="drawer = !drawer" />
       <v-spacer />
-      <!-- ---------------------------------------------- -->
-      <!-- User Profile -->
-      <!-- ---------------------------------------------- -->
       <HeaderVue />
     </v-app-bar>
 
-    <!-- ---------------------------------------------- -->
-    <!---Page Wrapper -->
-    <!-- ---------------------------------------------- -->
     <v-main>
       <v-container fluid class="page-wrapper">
         <RouterView />

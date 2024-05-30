@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from "sweetalert2";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = 'http://127.0.0.1:3333/api/v1/';
 
 const artworks = ref([]);
 const imageApiUrl = `${API_URL}artwork/image/`;

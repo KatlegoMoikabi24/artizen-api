@@ -3,8 +3,8 @@ import { ref } from "vue";
 import BaseCard from "@/components/BaseCard.vue";
 
 import TableDencity from "./table-data/TableDencity.vue";
-import TableFixHeight from "./table-data/TableFixHeight.vue";
 import TableFixHeader from "./table-data/TableFixHeader.vue";
+
 </script>
 
 <template>

@@ -1,36 +1,83 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-const desserts = ref([
-]);
+const usersData = ref([]);
+const roles = ['Buyer', 'Artist'];
+const API_URL = 'http://127.0.0.1:3333/api/v1/';
+
+const getAllUsers = async () => {
+  try {
+    const response = await axios.get(`${API_URL}users/`);
+    usersData.value = response.data;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+};
+
+const updateUser = async (user:any) => {
+  try {
+    await axios.put(`${API_URL}users/${user.id}`, {
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      role: user.role,
+      contacts: user.contacts
+    });
+    alert('User updated successfully!');
+  } catch (error) {
+    console.error('Error updating user:', error);
+    alert('Failed to update user.');
+  }
+};
+
+onMounted(getAllUsers);
 </script>
 
+
 <template>
-  <!-- ----------------------------------------------------------------------------- -->
-  <!-- Fixed Header -->
-  <!-- ----------------------------------------------------------------------------- -->
   <div>
     <p class="text-subtitle-1 text-grey-darken-1">
-     Manage User Profile
+      Manage User Profile
     </p>
     <div class="mt-4">
       <v-table fixed-header height="300px">
         <thead>
-          <tr>
-            <th class="text-left">Name</th>
-            <th class="text-left">Surname</th>
-            <th class="text-left">Email</th>
-            <th class="text-left">User Role</th>
-            <th class="text-left">Password</th>
-            <th class="text-left">Confirm Password</th>
-            <th class="text-left">Actionable Item</th>
-          </tr>
+        <tr>
+          <th class="text-left">Name</th>
+          <th class="text-left">Surname</th>
+          <th class="text-left">Email</th>
+          <th class="text-left">User Role</th>
+          <th class="text-left">Actionable Item</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-for="item in desserts" :key="item.name">
-            <td>{{ item.name }}</td>
-            <td>{{ item.calories }}</td>
-          </tr>
+        <tr v-for="user in usersData" :key="user.id">
+          <td>
+            <v-text-field v-model="user.name" dense hide-details></v-text-field>
+          </td>
+          <td>
+            <v-text-field v-model="user.surname" dense hide-details></v-text-field>
+          </td>
+          <td>
+            <v-text-field v-model="user.email" dense hide-details></v-text-field>
+          </td>
+          <td>
+            <v-select
+              :items="roles"
+              v-model="user.role"
+              dense
+              hide-details
+              solo
+            ></v-select>
+          </td>
+          <td>
+            <v-text-field v-model="user.contacts" dense hide-details type="Phone Number"></v-text-field>
+          </td>
+          <td>
+            <v-btn @click="updateUser(user)" dense>Update</v-btn>
+          </td>
+        </tr>
         </tbody>
       </v-table>
     </div>

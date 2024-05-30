@@ -32,9 +32,8 @@ onMounted(async () => {
     const user = JSON.parse(<string>localStorage.getItem('user'));
     if(user.role === 'admin'){
       const { data } = await axios.get(getAllArtworks);
-
       
-      if(data.filter(items => items.status === 'pending')){
+      if(data.filter(items => items.status === 'pending').length > 0){
         await Swal.fire({
           title: 'New Artwork',
           text: 'Artwork Named Requires Your Attention!',
