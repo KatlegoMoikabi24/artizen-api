@@ -7,7 +7,7 @@ import axios from "axios";
 
 const sidebarMenu = ref(sidebarItems);
 const user = JSON.parse(<string>localStorage.getItem('user'));
-const API_URL = "https://bunny-growing-anemone.ngrok-free.app/api/v1/";
+const API_URL = "https://first-unbiased-osprey.ngrok-free.app/api/v1/";
 const getAllArtworks = `${API_URL}artwork/`;
 const axiosInstance = axios.create({
   headers: {

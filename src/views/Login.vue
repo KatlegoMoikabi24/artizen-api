@@ -130,7 +130,7 @@
 <script>
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
 
 export default {
   data() {
@@ -208,7 +208,7 @@ export default {
     },
     async login() {
       try {
-        const response = await axios.post(`https://bunny-growing-anemone.ngrok-free.app/api/v1/auth/login`, {
+        const response = await axios.post(`https://first-unbiased-osprey.ngrok-free.app/api/v1/auth/login`, {
           email: this.email.value,
           password: this.password.value
         });

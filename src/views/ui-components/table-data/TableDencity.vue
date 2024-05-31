@@ -8,7 +8,7 @@ const dialog = ref(false);
 const selectedUser = ref(null);
 const selectedRole = ref('');
 
-const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
 const getAllUsers = `${API_URL}users/`;
 const axiosInstance = axios.create({
   headers: {

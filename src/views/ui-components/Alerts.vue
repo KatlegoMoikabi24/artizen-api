@@ -79,7 +79,7 @@ import { ref, onMounted } from 'vue';
 import BaseCard from "@/components/BaseCard.vue";
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
 
 const imageUrl = ref<string | null>(null);
 const artworks = ref([]);

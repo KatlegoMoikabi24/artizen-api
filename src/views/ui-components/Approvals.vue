@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from "sweetalert2";
-const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
 
 const artworks = ref([]);
 const imageApiUrl = `${API_URL}artwork/image/`;

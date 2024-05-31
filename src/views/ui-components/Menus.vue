@@ -145,7 +145,7 @@ import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
-const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
 const axiosInstance = axios.create({
   headers: {
     'ngrok-skip-browser-warning': 'true',

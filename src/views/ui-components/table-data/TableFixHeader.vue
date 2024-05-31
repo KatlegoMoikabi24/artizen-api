@@ -4,7 +4,7 @@ import axios from "axios";
 
 const usersData = ref([]);
 const roles = ['Buyer', 'Artist'];
-const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
+const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
 const userProfile = JSON.parse(<string> localStorage.getItem('user'))
 const isAdmin = userProfile.role === 'admin';
 
