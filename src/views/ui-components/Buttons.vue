@@ -17,11 +17,13 @@ const axiosInstance = axios.create({
 const imageApiUrl = `${API_URL}artwork/image/`;
 const getAllArtworks = `${API_URL}artwork/`;
 const getAllUsers = `${API_URL}users/`;
+const updateBidTimerAPI = `${API_URL}artwork/reloadBid/`;
 const placeBidAPI = `${API_URL}artwork/update/`;
 const artworks = ref([]);
 const countdowns = ref<{ [key: number]: string }>({});
 const usersData = ref([]);
 const user = JSON.parse(<string>localStorage.getItem('user'));
+let isBidClosed = false;
 
 const bidAmounts = ref<{ [key: number]: string }>({});
 function getUserDetails(id: number) {
@@ -33,28 +35,46 @@ function getUserDetails(id: number) {
 }
 
 function startCountdown(artwork: any) {
-  const createdAt = moment(artwork.created_at);
-  const expiresAt = createdAt.add(1, 'minutes');
+  if (artwork.stage > 1 && artwork.status === 'approved') {
+    const bidTime = moment(artwork.bid_time);
+    const expiresAt = bidTime.add(0, 'minutes');
 
-  const updateCountdown = () => {
-    const now = moment();
-    const duration = moment.duration(expiresAt.diff(now));
+    const updateCountdown = () => {
+      const now = moment();
+      const duration = moment.duration(expiresAt.diff(now));
 
-    if (duration.asSeconds() <= 0 && artwork.status === 'approved') {
-      countdowns.value[artwork.id] = 'Bought';
-    } else {
-      countdowns.value[artwork.id] = `${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`;
-    }
-  };
-
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+      if (duration.asSeconds() <= 0 && artwork.status === 'approved') {
+        if(artwork.bought_by === null) {
+          updateArtworkStatus(artwork.id);
+          location.reload();
+        } else {
+          isBidClosed = true;
+          countdowns.value[artwork.id] = 'Bought';
+        }
+      } else {
+        countdowns.value[artwork.id] = `${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`;
+      }
+    };
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+}
+async function updateArtworkStatus(artworkId: number) {
+  try {
+    await axios.put(updateBidTimerAPI + artworkId, {
+      status: 'Bought'
+    }).then(() => {
+      location.reload();
+    })
+  } catch (error) {
+    console.error('Error updating artwork status:', error);
+  }
 }
 onMounted(async () => {
   try {
     const response = await axiosInstance.get(getAllArtworks);
     const usersResponse = await axiosInstance.get(getAllUsers);
-    artworks.value = response.data.filter(item => item.status !== '');
+    artworks.value = response.data.filter(item => item.status === 'approved');
     usersData.value = usersResponse.data;
 
     artworks.value.forEach(artwork => {
@@ -62,6 +82,22 @@ onMounted(async () => {
 
       bidAmounts.value[artwork.id] = '';
     });
+
+    const myPendingArtworks = artworks.value.filter(work => work.bought_by == user.id);
+
+    if(myPendingArtworks.filter(art => art.stage === 3).length > 0) {
+      await Swal.fire({
+        title: 'Artwork Payment Required!',
+        text: 'Please Make A Payment For Artworks that needs Your Payment',
+        icon: 'info',
+        confirmButtonText: 'Proceed To Payment',
+        showCancelButton: false
+      }).then(() => {
+        location.replace('/ui-components/menus?art='+1);
+      })
+    }
+
+
   } catch (error) {
     console.log(import.meta.env);
   }
@@ -143,10 +179,15 @@ async function placeBid(artwork: any) {
           <br>
           <b>Status: </b> {{ artwork.status.toUpperCase() }}
           <br><br>
-          <b>Time Left: </b> {{ countdowns[artwork.id] }}
+          <b>{{ artwork.stage < 3 ? 'Time Left: ' : 'This Artwork is '}} </b> {{ countdowns[artwork.id] }}
           <br><br>
 
-          <v-text-field v-model="bidAmounts[artwork.id]" label="Enter Bid Amount.."></v-text-field>
+          <v-text-field
+            v-model="bidAmounts[artwork.id]"
+            label="Enter Bid Amount.."
+            v-if="user.role !== 'admin' && artwork.stage < 3"
+          >
+          </v-text-field>
 
           <v-btn
             block
@@ -165,7 +206,7 @@ async function placeBid(artwork: any) {
             Pending Approval
           </v-btn>
           <v-btn
-            v-if="artwork.status === 'approved' && user.role !== 'admin'"
+            v-if="artwork.status === 'approved' && user.role !== 'admin' && artwork.stage < 3"
             elevation="5"
             color="success"
             @click="placeBid(artwork)"
