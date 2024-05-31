@@ -35,7 +35,7 @@ function getUserDetails(id: number) {
 }
 
 function startCountdown(artwork: any) {
-  if (artwork.stage > 1 && artwork.status === 'approved') {
+  if (artwork.status === 'approved') {
     const bidTime = moment(artwork.bid_time);
     const expiresAt = bidTime.add(0, 'minutes');
 
@@ -43,7 +43,7 @@ function startCountdown(artwork: any) {
       const now = moment();
       const duration = moment.duration(expiresAt.diff(now));
 
-      if (duration.asSeconds() <= 0 && artwork.status === 'approved') {
+      if (duration.asSeconds() <= 0 && artwork.stage !== 5 ) {
         if(artwork.bought_by === null) {
           updateArtworkStatus(artwork.id);
           location.reload();
@@ -85,7 +85,7 @@ onMounted(async () => {
 
     const myPendingArtworks = artworks.value.filter(work => work.bought_by == user.id);
 
-    if(myPendingArtworks.filter(art => art.stage === 3).length > 0) {
+    if(myPendingArtworks.filter(art => art.stage > 4).length > 0) {
       await Swal.fire({
         title: 'Artwork Payment Required!',
         text: 'Please Make A Payment For Artworks that needs Your Payment',
@@ -93,10 +93,9 @@ onMounted(async () => {
         confirmButtonText: 'Proceed To Payment',
         showCancelButton: false
       }).then(() => {
-        location.replace('/ui-components/menus?art='+1);
+        location.replace('/ui-components/menus?art=' + 1);
       })
     }
-
 
   } catch (error) {
     console.log(import.meta.env);
@@ -131,7 +130,7 @@ async function placeBid(artwork: any) {
         }).then(() => {
           Swal.fire({
             title: 'Place bid!',
-            text: 'Bid for this order is successfully placed',
+            text: 'Bid for this artwork is successfully placed',
             icon: 'success',
             confirmButtonText: 'Ok'
           }).then(() => {
@@ -179,13 +178,13 @@ async function placeBid(artwork: any) {
           <br>
           <b>Status: </b> {{ artwork.status.toUpperCase() }}
           <br><br>
-          <b>{{ artwork.stage < 3 ? 'Time Left: ' : 'This Artwork is '}} </b> {{ countdowns[artwork.id] }}
+          <b>{{ artwork.stage < 4 ? 'Time Left: ' : 'This Artwork is '}} </b> {{ countdowns[artwork.id] }}
           <br><br>
 
           <v-text-field
             v-model="bidAmounts[artwork.id]"
             label="Enter Bid Amount.."
-            v-if="user.role !== 'admin' && artwork.stage < 3"
+            v-if="user.role !== 'admin' && artwork.stage < 5"
           >
           </v-text-field>
 
@@ -206,7 +205,7 @@ async function placeBid(artwork: any) {
             Pending Approval
           </v-btn>
           <v-btn
-            v-if="artwork.status === 'approved' && user.role !== 'admin' && artwork.stage < 3"
+            v-if="artwork.status === 'approved' && user.role !== 'admin' && artwork.stage < 4"
             elevation="5"
             color="success"
             @click="placeBid(artwork)"

@@ -165,7 +165,7 @@ const cartItems = ref([]);
 
 const paymentHistory = ref([]);
 
-const getArtwork = `${API_URL}artwork/`;
+const getArtwork = `${API_URL}artwork/owner/`;
 const buyArtworkAPI = `${API_URL}artwork/buy/`;
 const getPaymentsAPI = `${API_URL}payments/user/`;
 const getAllPaymentsAPI = `${API_URL}payments/`;
@@ -245,14 +245,14 @@ onMounted(async () => {
     const usersResponse = await axiosInstance.get(getAllUsers);
     usersData.value = usersResponse.data;
 
-    if (route.query.art) {
+    if(route.query.art) {
       artId = route.query.art;
 
-      const response = await axiosInstance.get(getArtwork + artId);
-
+      const response = await axiosInstance.get(getArtwork +  user.id);
       onBuy.value = true;
       totalAmount = response.data.price;
-      cartItems.value.push(response.data);
+
+      cartItems.value = response.data.filter(items => items.stage == 5 && items.status !== 'sold');
 
     } else {
       onBuy.value = false;
@@ -295,6 +295,7 @@ async function buyArtwork() {
       confirmButtonText: 'Ok'
     });
   } else {
+    artId = cartItems.value[0].id;
     try {
       await Swal.fire({
         title: 'Artwork Payment',
