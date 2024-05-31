@@ -42,8 +42,8 @@ onMounted(async () => {
       
       if(data.filter(items => items.status === 'pending').length > 0){
         await Swal.fire({
-          title: 'New Artwork',
-          text: 'Artwork Named Requires Your Attention!',
+          title: 'New Artwork Uploaded',
+          text: 'New Artworks Requires Your Attention!',
           icon: 'warning',
           confirmButtonText: 'Ok'
         });

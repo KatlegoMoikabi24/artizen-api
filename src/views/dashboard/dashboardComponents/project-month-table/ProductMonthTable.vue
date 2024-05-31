@@ -26,7 +26,8 @@ const rejectAPI = `${API_URL}artwork/reject/`;
 
 function exportReport() {
   try {
-    const worksheet = XLSX.utils.json_to_sheet(monthtable.value);
+    const modifiedData = monthtable.value.map(({ picture, ...rest }) => rest);
+    const worksheet = XLSX.utils.json_to_sheet(modifiedData);
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Artwork Reports');
@@ -50,8 +51,9 @@ function exportReport() {
 }
 function exportCsv() {
   try {
+    const modifiedData = monthtable.value.map(({ picture, ...rest }) => rest);
 
-    const worksheet = XLSX.utils.json_to_sheet(monthtable.value);
+    const worksheet = XLSX.utils.json_to_sheet(modifiedData);
     const csv = XLSX.utils.sheet_to_csv(worksheet);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");

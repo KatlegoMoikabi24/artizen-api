@@ -73,8 +73,8 @@
               <v-spacer></v-spacer>
               <div class="ml-auto">
                 <v-row>
-                  <v-btn elevation="7">Export to Excel</v-btn>
-                  <v-btn class="ml-2" color="default" elevation="5">Export to CSV</v-btn>
+                  <v-btn elevation="7" @click="exportReport">Export to Excel</v-btn>
+                  <v-btn class="ml-2" color="default" elevation="5" @click="exportCsv">Export to CSV</v-btn>
                 </v-row>
               </div>
             </div>
@@ -144,6 +144,7 @@ import BaseCard from '@/components/BaseCard.vue';
 import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
+import * as XLSX from "xlsx";
 const API_URL = 'https://bunny-growing-anemone.ngrok-free.app/api/v1/';
 const axiosInstance = axios.create({
   headers: {
@@ -181,6 +182,64 @@ function getUserDetails(id: any) {
     return `${userObj.name}  ${userObj.surname}`;
   }
 }
+
+function exportReport() {
+  try {
+    const worksheet = XLSX.utils.json_to_sheet(paymentHistory.value);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Payment Reports');
+
+    XLSX.writeFile(workbook, 'payment-report.xlsx');
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Downloaded Payment Reports',
+      text: 'Successfully download payment reports',
+      showLoaderOnConfirm: true,
+    });
+  }catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error Occurred',
+      text: 'Failed to Download Artwork Reports',
+      showLoaderOnConfirm: true,
+    });
+  }
+}
+function exportCsv() {
+  try {
+
+    const worksheet = XLSX.utils.json_to_sheet(paymentHistory.value);
+    const csv = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "payment-report.csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Downloaded Payment Reports',
+      text: 'Successfully download payment reports',
+      showLoaderOnConfirm: true,
+    });
+  }catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error Occurred',
+      text: 'Failed to Download Artwork Reports',
+      showLoaderOnConfirm: true,
+    });
+  }
+}
+
 onMounted(async () => {
   try {
     const usersResponse = await axiosInstance.get(getAllUsers);
