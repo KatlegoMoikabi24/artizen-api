@@ -166,7 +166,7 @@ async function placeBid(artwork: any) {
         <img
           style="width: 100%;"
           height="320"
-          :src="`${imageApiUrl}${artwork.picture}`"
+          :src="`data:image/png;base64,${artwork.picture}`"
           :alt="artwork.name"
         />
         <v-card-text>
