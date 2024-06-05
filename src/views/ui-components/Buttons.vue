@@ -4,7 +4,7 @@ import axios from 'axios';
 import moment from "moment";
 import Swal from "sweetalert2";
 
-const API_URL = "https://first-unbiased-osprey.ngrok-free.app/api/v1/";
+const API_URL = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
   headers: {
     'ngrok-skip-browser-warning': 'true',
@@ -34,6 +34,16 @@ function getUserDetails(id: number) {
   return '';
 }
 
+function validateTime(artwork:any) {
+  const bidTime = moment(artwork.bid_time);
+  const expiresAt = bidTime.add(0, 'minutes');
+
+  const now = moment();
+  const duration = moment.duration(expiresAt.diff(now));
+
+  return duration.asSeconds() < 1;
+
+}
 function startCountdown(artwork: any) {
   if (artwork.status === 'approved') {
     const bidTime = moment(artwork.bid_time);
@@ -49,7 +59,7 @@ function startCountdown(artwork: any) {
           location.reload();
         } else {
           isBidClosed = true;
-          countdowns.value[artwork.id] = 'Bought';
+          countdowns.value[artwork.id] = 'Payment In Progress';
         }
       } else {
         countdowns.value[artwork.id] = `${duration.hours()}h ${duration.minutes()}m ${duration.seconds()}s`;
@@ -85,16 +95,18 @@ onMounted(async () => {
 
     const myPendingArtworks = artworks.value.filter(work => work.bought_by == user.id);
 
-    if(myPendingArtworks.filter(art => art.stage > 4).length > 0) {
-      await Swal.fire({
-        title: 'Artwork Payment Required!',
-        text: 'Please Make A Payment For Artworks that needs Your Payment',
-        icon: 'info',
-        confirmButtonText: 'Proceed To Payment',
-        showCancelButton: false
-      }).then(() => {
-        location.replace('/ui-components/menus?art=' + 1);
-      })
+    if(validateTime(myPendingArtworks[0])) {
+      if(myPendingArtworks.filter(art => art.status === 'approved').length > 0) {
+        await Swal.fire({
+          title: 'Artwork Payment Required!',
+          text: 'Please Make A Payment For Artworks that needs Your Payment',
+          icon: 'info',
+          confirmButtonText: 'Proceed To Payment',
+          showCancelButton: false
+        }).then(() => {
+          location.replace('/ui-components/menus?art=' + myPendingArtworks[0].id);
+        })
+      }
     }
 
   } catch (error) {
@@ -178,13 +190,13 @@ async function placeBid(artwork: any) {
           <br>
           <b>Status: </b> {{ artwork.status.toUpperCase() }}
           <br><br>
-          <b>{{ artwork.stage < 4 ? 'Time Left: ' : 'This Artwork is '}} </b> {{ countdowns[artwork.id] }}
+          <b>{{ isBidClosed ? 'Time Left: ' : 'Bid Status: '}} </b> {{ countdowns[artwork.id] }}
           <br><br>
 
           <v-text-field
             v-model="bidAmounts[artwork.id]"
             label="Enter Bid Amount.."
-            v-if="user.role !== 'admin' && artwork.stage < 5"
+            v-if="user.role !== 'admin' && !isBidClosed"
           >
           </v-text-field>
 
@@ -205,7 +217,8 @@ async function placeBid(artwork: any) {
             Pending Approval
           </v-btn>
           <v-btn
-            v-if="artwork.status === 'approved' && user.role !== 'admin' && artwork.stage < 4"
+            v-if="artwork.status === 'approved' && user.role !== 'admin' &&
+             countdowns.value[artwork.id] !== 'Payment In Progress'"
             elevation="5"
             color="success"
             @click="placeBid(artwork)"

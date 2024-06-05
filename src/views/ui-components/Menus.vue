@@ -145,7 +145,7 @@ import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
-const API_URL = 'https://first-unbiased-osprey.ngrok-free.app/api/v1/';
+const API_URL = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
   headers: {
     'ngrok-skip-browser-warning': 'true',
@@ -246,14 +246,12 @@ onMounted(async () => {
     usersData.value = usersResponse.data;
 
     if(route.query.art) {
-      artId = route.query.art;
-
       const response = await axiosInstance.get(getArtwork +  user.id);
       onBuy.value = true;
+      artId = route.query.art;
       totalAmount = response.data.price;
 
-      cartItems.value = response.data.filter(items => items.stage == 5 && items.status !== 'sold');
-
+      cartItems.value = response.data.filter(items => items.status !== 'sold');
     } else {
       onBuy.value = false;
     }
