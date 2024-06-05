@@ -12,11 +12,11 @@
                 <b>Quantity:</b> 1
               </div>
               <div class="item-price">
-                <strong>Price: R</strong>{{ item.price.toFixed(2) }}
+                <strong>Price: R</strong>{{ item.price }}
               </div>
               <v-divider></v-divider>
               <div class="order-total">
-                <strong>Total: R{{ item.price.toFixed(2) }}</strong>
+                <strong>Total: R{{ item.price }}</strong>
               </div>
             </div>
           </div>

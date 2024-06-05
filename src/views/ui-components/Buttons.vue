@@ -196,7 +196,7 @@ async function placeBid(artwork: any) {
           <v-text-field
             v-model="bidAmounts[artwork.id]"
             label="Enter Bid Amount.."
-            v-if="user.role !== 'admin' && !isBidClosed"
+            v-if="user.role !== 'admin' && artwork.stage !== 3"
           >
           </v-text-field>
 
@@ -217,7 +217,7 @@ async function placeBid(artwork: any) {
             Pending Approval
           </v-btn>
           <v-btn
-            v-if="artwork.status === 'approved' && user.role !== 'admin'"
+            v-if="artwork.status === 'approved' && artwork.stage !== 3 && user.role !== 'admin'"
             elevation="5"
             color="success"
             @click="placeBid(artwork)"
