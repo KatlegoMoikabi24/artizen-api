@@ -217,8 +217,7 @@ async function placeBid(artwork: any) {
             Pending Approval
           </v-btn>
           <v-btn
-            v-if="artwork.status === 'approved' && user.role !== 'admin' &&
-             countdowns.value[artwork.id] !== 'Payment In Progress'"
+            v-if="artwork.status === 'approved' && user.role !== 'admin'"
             elevation="5"
             color="success"
             @click="placeBid(artwork)"
