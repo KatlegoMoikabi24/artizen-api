@@ -4,6 +4,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 
+let isLoading = ref(false);
+
 const API_URL = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
   headers: {
@@ -13,8 +15,6 @@ const axiosInstance = axios.create({
     'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
   },
 });
-const select = ref("March");
-const items = ref(["March", "April", "May", "June"]);
 
 const monthtable = ref([]);
 const usersData = ref([]);
@@ -85,6 +85,8 @@ function exportCsv() {
 
 onMounted(async () => {
   try {
+    isLoading.value = true;
+
     const response = await axiosInstance.get(getAllArtworks);
     const usersResponse = await axiosInstance.get(getAllUsers);
 
@@ -92,8 +94,9 @@ onMounted(async () => {
     usersData.value = usersResponse.data;
 
   } catch (error) {
-    console.error('Error fetching artworks:', error);
+   alert(error);
   }
+  isLoading.value = false;
 });
 
 function getUserDetails(id: any) {
@@ -112,6 +115,8 @@ async function approve(id: any) {
       showCancelButton: true
     }).then(async (result) => {
       if (result.value) {
+        isLoading.value = true;
+
         await axiosInstance.put(approveAPI + id).then(async () => {
           await Swal.fire({
             title: 'Artwork approved!',
@@ -133,7 +138,8 @@ async function approve(id: any) {
         })
       }
     });
-}
+  isLoading.value = false;
+ }
 async function reject(id: any) {
   await Swal.fire({
     title: 'Reject Artwork?',
@@ -263,4 +269,38 @@ async function reject(id: any) {
       </v-table>
     </v-card-text>
   </v-card>
+  <div v-if="isLoading" class="overlay">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
 </template>
+
+
+<style scoped>
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

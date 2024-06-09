@@ -25,8 +25,10 @@ onMounted(async () => {
        text: 'Unauthorized Access, Please login',
        icon: 'error',
        confirmButtonText: 'Ok'
+     }).then(() => {
+       location.replace('/auth/login');
      });
-    return;
+
   } else {
     const isFirstLogin = localStorage.getItem('isFirstLogin');
 

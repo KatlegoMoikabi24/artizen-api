@@ -46,7 +46,7 @@ export default [
     title: "Settings",
     icon: "mdi-cog",
     to: "/ui-components/tables",
-    role: "admin"
+    role: "*"
   },
   {
     title: "Logout",

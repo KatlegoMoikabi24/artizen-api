@@ -4,6 +4,8 @@ import axios from 'axios';
 import moment from "moment";
 import Swal from "sweetalert2";
 
+let isLoading = ref(false);
+
 const API_URL = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
   headers: {
@@ -34,16 +36,6 @@ function getUserDetails(id: number) {
   return '';
 }
 
-function validateTime(artwork:any) {
-  const bidTime = moment(artwork.bid_time);
-  const expiresAt = bidTime.add(0, 'minutes');
-
-  const now = moment();
-  const duration = moment.duration(expiresAt.diff(now));
-
-  return duration.asSeconds() < 1;
-
-}
 function startCountdown(artwork: any) {
   if (artwork.status === 'approved') {
     const bidTime = moment(artwork.bid_time);
@@ -82,9 +74,10 @@ async function updateArtworkStatus(artworkId: number) {
 }
 onMounted(async () => {
   try {
+    isLoading.value = true;
     const response = await axiosInstance.get(getAllArtworks);
     const usersResponse = await axiosInstance.get(getAllUsers);
-    artworks.value = response.data.filter(item => item.status === 'approved');
+    artworks.value = response.data.filter(item => item.status === 'approved' || item.status === 'pending');
     usersData.value = usersResponse.data;
 
     artworks.value.forEach(artwork => {
@@ -95,7 +88,6 @@ onMounted(async () => {
 
     const myPendingArtworks = artworks.value.filter(work => work.bought_by == user.id);
 
-    if(validateTime(myPendingArtworks[0])) {
       if(myPendingArtworks.filter(art => art.status === 'approved').length > 0) {
         await Swal.fire({
           title: 'Artwork Payment Required!',
@@ -106,12 +98,13 @@ onMounted(async () => {
         }).then(() => {
           location.replace('/ui-components/menus?art=' + myPendingArtworks[0].id);
         })
-      }
+
     }
 
   } catch (error) {
     console.log(import.meta.env);
   }
+  isLoading.value = false;
 });
 
 async function placeBid(artwork: any) {
@@ -128,6 +121,7 @@ async function placeBid(artwork: any) {
   }
 
   try {
+    isLoading.value = true;
     await Swal.fire({
       title: 'Place Bid',
       text: 'Are you sure you would like to place a bid for this artwork?',
@@ -161,6 +155,7 @@ async function placeBid(artwork: any) {
   } catch (error) {
     alert('Error Occurred : ' + error);
   }
+  isLoading.value = false;
 }
 
 </script>
@@ -171,6 +166,12 @@ async function placeBid(artwork: any) {
   </h1>
 
   <v-divider></v-divider>
+
+  <div v-if="artworks.length <= 0" class="pt-10">
+    <h3>
+      <marquee>No Artworks Available</marquee>
+    </h3>
+  </div>
   <v-row class="pt-5">
     <v-col v-for="artwork in artworks" :key="artwork.id" cols="12" lg="4">
       <v-card>
@@ -190,13 +191,15 @@ async function placeBid(artwork: any) {
           <br>
           <b>Status: </b> {{ artwork.status.toUpperCase() }}
           <br><br>
-          <b>{{ isBidClosed ? 'Time Left: ' : 'Bid Status: '}} </b> {{ countdowns[artwork.id] }}
+          <span v-if="artwork.status !== 'pending'">
+            <b>{{ isBidClosed ? 'Time Left: ' : 'Bid Status: '}} </b> {{ countdowns[artwork.id] }}
+          </span>
           <br><br>
 
           <v-text-field
             v-model="bidAmounts[artwork.id]"
             label="Enter Bid Amount.."
-            v-if="user.role !== 'admin' && artwork.stage !== 3"
+            v-if="user.role !== 'admin' && artwork.stage !== 3 && artwork.status !== 'pending'"
           >
           </v-text-field>
 
@@ -229,10 +232,37 @@ async function placeBid(artwork: any) {
       </v-card>
     </v-col>
   </v-row>
+  <div v-if="isLoading" class="overlay">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
 </template>
 
 <style scoped>
-.error-message {
-  color: red;
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

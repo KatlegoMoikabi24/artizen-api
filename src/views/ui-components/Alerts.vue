@@ -43,6 +43,13 @@
 
   <h1 class="pl-2">My Artworks</h1>
   <v-divider></v-divider>
+
+  <div v-if="artworks.length <= 0" class="pt-10">
+    <h3>
+      <marquee>No Artworks Available</marquee>
+    </h3>
+  </div>
+
   <v-row class="pt-5">
     <v-col v-for="artwork in artworks" :key="artwork.id" cols="12" lg="4">
       <v-card elevation="7">
@@ -72,6 +79,10 @@
       </v-card>
     </v-col>
   </v-row>
+  <div v-if="isLoading" class="overlay">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -80,6 +91,8 @@ import BaseCard from "@/components/BaseCard.vue";
 import axios from "axios";
 import Swal from "sweetalert2";
 const API_URL = import.meta.env.VITE_API_URL;
+
+let isLoading = ref(false);
 
 const imageUrl = ref<string | null>(null);
 const artworks = ref([]);
@@ -127,6 +140,7 @@ function handleFileUpload(event: Event) {
 }
 onMounted(async () => {
   try {
+    isLoading.value = true;
     const user = JSON.parse(<string>localStorage.getItem('user'));
     const response = await axiosInstance.get(getByArtistId + user.id);
 
@@ -136,6 +150,9 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching artworks:', error);
   }
+
+  isLoading.value = false;
+
 });
 async function upload() {
 
@@ -159,6 +176,9 @@ async function upload() {
       confirmButtonText: 'Ok'
     });
   } else {
+
+    isLoading.value = true;
+
     const formData = new FormData();
     formData.append('name', artwork.value.name);
     formData.append('price', artwork.value.price);
@@ -181,10 +201,36 @@ async function upload() {
     } catch (error) {
       alert(error)
     }
+    isLoading.value = false;
   }
 }
 </script>
 
 <style scoped>
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>

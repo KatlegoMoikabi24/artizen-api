@@ -7,6 +7,7 @@ const roles = ['Buyer', 'Artist'];
 const API_URL = import.meta.env.VITE_API_URL;
 const userProfile = JSON.parse(<string> localStorage.getItem('user'))
 const isAdmin = userProfile.role === 'admin';
+let isLoading = ref(false);
 
 const axiosInstance = axios.create({
   headers: {
@@ -18,6 +19,7 @@ const axiosInstance = axios.create({
 });
 const getAllUsers = async () => {
   try {
+    isLoading.value = true;
     if(!isAdmin) {
       const response = await axiosInstance.get(`${API_URL}users/${userProfile.id}`);
       usersData.value.push(response.data);
@@ -25,14 +27,17 @@ const getAllUsers = async () => {
       const response = await axiosInstance.get(`${API_URL}users/`);
       usersData.value = response.data;
     }
-
   } catch (error) {
     console.error('Error fetching users:', error);
   }
+  isLoading.value = false;
 };
 
 const updateUser = async (user:any) => {
+
   try {
+    isLoading.value = true;
+
     await axiosInstance.post(`${API_URL}users/${user.id}`, {
       name: user.name,
       surname: user.surname,
@@ -45,13 +50,18 @@ const updateUser = async (user:any) => {
     console.error('Error updating user:', error);
     alert('Failed to update user.');
   }
+  isLoading.value = false;
+
 };
 
 onMounted(getAllUsers);
 </script>
 
-
 <template>
+  <div v-if="isLoading" class="overlay">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
   <div>
     <p class="text-subtitle-1 text-grey-darken-1">
       Manage User Profile
@@ -101,3 +111,32 @@ onMounted(getAllUsers);
     </div>
   </div>
 </template>
+
+<style scoped>
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>

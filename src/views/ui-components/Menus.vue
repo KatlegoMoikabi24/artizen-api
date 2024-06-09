@@ -136,6 +136,10 @@
 
       </v-col>
     </v-row>
+    <div v-if="isLoading" class="overlay">
+      <div class="loader"></div>
+      <p>Loading...</p>
+    </div>
   </v-container>
 </template>
 <script setup lang="ts">
@@ -145,6 +149,9 @@ import { useRoute } from 'vue-router';
 import axios from "axios";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
+
+let isLoading = ref(false);
+
 const API_URL = import.meta.env.VITE_API_URL;
 const axiosInstance = axios.create({
   headers: {
@@ -242,6 +249,7 @@ function exportCsv() {
 
 onMounted(async () => {
   try {
+    isLoading.value = true;
     const usersResponse = await axiosInstance.get(getAllUsers);
     usersData.value = usersResponse.data;
 
@@ -256,11 +264,15 @@ onMounted(async () => {
       onBuy.value = false;
     }
 
-    const payments_response = await axiosInstance.get((user.role === 'admin' ? getAllPaymentsAPI : getPaymentsAPI + user.id));
+    const payments_response = await axiosInstance.get(
+        (user.role === 'admin' ? getAllPaymentsAPI : getPaymentsAPI + user.id));
     paymentHistory.value = payments_response.data;
   } catch (error) {
     alert('Error Occurred : ' + error);
   }
+
+  isLoading.value = false;
+
 });
 
 function handlePaymentSubmit() {
@@ -359,5 +371,32 @@ async function buyArtwork() {
 
 .item-name h3 {
   color: blue;
+}
+
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
