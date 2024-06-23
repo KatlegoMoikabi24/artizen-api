@@ -149,6 +149,9 @@ async function reject(id: any) {
     showCancelButton: true
   }).then(async (result) => {
     if (result.value) {
+
+      isLoading.value = true;
+
       await axiosInstance.put(rejectAPI + id).then(async () => {
         await Swal.fire({
           title: 'Artwork rejected!',
@@ -170,6 +173,7 @@ async function reject(id: any) {
       })
     }
   });
+  isLoading.value = false;
 }
 </script>
 
@@ -232,7 +236,7 @@ async function reject(id: any) {
                   :color="item.statuscolor"
                   size="large"
                   label
-                  ><b>{{ (item.status === "" ? "REJECTED" : item.status.toUpperCase()) }}</b>
+                  ><b>{{ (item.status === "" || item.stage == 1 ? "REJECTED" : item.status.toUpperCase()) }}</b>
                 </v-chip >
               </td>
               <td>
@@ -248,7 +252,7 @@ async function reject(id: any) {
                     color="success"
                     @click="approve(item.id)"
                     elevation="7"
-                    :disabled="item.status === 'approved'  || item.status === 'sold'"
+                    :disabled=" item.status === 'sold'"
                   >
                     Approve
                   </v-btn>
@@ -257,7 +261,7 @@ async function reject(id: any) {
                     color="error"
                     @click="reject(item.id)"
                     elevation="7"
-                    :disabled="item.status === '' || item.status === 'sold'"
+                    :disabled="item.status === 'sold'"
                   >
                     Reject
                   </v-btn>

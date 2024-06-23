@@ -22,7 +22,7 @@ const userDetails = JSON.parse(<string> localStorage.getItem('user'))
           :ripple="false"
         >
           <v-avatar size="35">
-            <img src="@/assets/images/users/user2.jpg" alt="User" />
+<!--            <img src="@/assets/images/users/user2.jpg" alt="User" />-->
           </v-avatar>
         </v-btn>
       </template>

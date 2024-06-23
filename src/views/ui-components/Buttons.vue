@@ -75,9 +75,15 @@ async function updateArtworkStatus(artworkId: number) {
 onMounted(async () => {
   try {
     isLoading.value = true;
+
     const response = await axiosInstance.get(getAllArtworks);
     const usersResponse = await axiosInstance.get(getAllUsers);
-    artworks.value = response.data.filter(item => item.status === 'approved' || item.status === 'pending');
+
+    artworks.value = response.data.filter(
+      item => (item.status === 'approved' && item.stage !== 1 ) ||
+              item.status === 'pending'
+    );
+
     usersData.value = usersResponse.data;
 
     artworks.value.forEach(artwork => {
@@ -98,7 +104,6 @@ onMounted(async () => {
         }).then(() => {
           location.replace('/ui-components/menus?art=' + myPendingArtworks[0].id);
         })
-
     }
 
   } catch (error) {
@@ -219,6 +224,7 @@ async function placeBid(artwork: any) {
           >
             Pending Approval
           </v-btn>
+
           <v-btn
             v-if="artwork.status === 'approved' && artwork.stage !== 3 && user.role !== 'admin'"
             elevation="5"

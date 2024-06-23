@@ -70,7 +70,7 @@
           <br>
           <br>
           <v-btn
-            v-if="artwork.status !== 'approved' || artwork.status === 'sold'"
+            v-if="(artwork.status !== 'approved' || artwork.stage == 1) || artwork.status === 'sold'"
             elevation="5"
             color="success"
             @click="deleteArtwork(artwork)"
@@ -120,9 +120,19 @@ const artwork = ref({
 const selectedFile = ref<File | null>(null);
 
 async function deleteArtwork(item:any) {
+  isLoading.value = true;
+
   const response = await axiosInstance.delete(deleteArtworkAPI + item.id);
 
-  alert(response.data.message);
+  await Swal.fire({
+    title: 'Deleted Artwork',
+    text: response.data.message,
+    icon: 'success',
+    confirmButtonText: 'Ok'
+  });
+
+  isLoading.value = false;
+  location.reload();
 }
 function handleFileUpload(event: Event) {
   const target = event.target as HTMLInputElement;
