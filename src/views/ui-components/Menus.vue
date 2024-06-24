@@ -259,7 +259,7 @@ onMounted(async () => {
       artId = route.query.art;
       totalAmount = response.data.price;
 
-      cartItems.value = response.data.filter(items => items.status !== 'sold');
+      cartItems.value = response.data.filter(items => items.id == route.query.art);
     } else {
       onBuy.value = false;
     }

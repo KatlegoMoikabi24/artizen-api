@@ -111,6 +111,10 @@ onMounted(async () => {
   isLoading.value = false;
 });
 
+async function makePayment(artwork: any) {
+  location.replace('/ui-components/menus?art=' + artwork.id);
+}
+
 async function placeBid(artwork: any) {
   const bidAmount = bidAmounts.value[artwork.id];
 
@@ -206,11 +210,12 @@ async function placeBid(artwork: any) {
             :disabled="countdowns[artwork.id] === 'Payment In Progress'"
             v-if="artwork.status === 'approved' &&
                   artwork.stage !== 1 &&
-                  artwork.stage !== 4 &&
                   user.role !== 'admin'"
           >
           </v-text-field>
-
+          <p class="mb-3">
+            <b>Highest Bidder:</b> {{ getUserDetails(artwork.bought_by) }}
+          </p>
           <v-btn
             block
             @click="placeBid(artwork)"
@@ -231,7 +236,6 @@ async function placeBid(artwork: any) {
           <v-btn
             v-if="artwork.status === 'approved' &&
                   artwork.stage !== 1 &&
-                  artwork.stage !== 4 &&
                   user.role !== 'admin'"
             elevation="5"
             color="success"
@@ -240,6 +244,20 @@ async function placeBid(artwork: any) {
             :disabled="countdowns[artwork.id] === 'Payment In Progress'"
           >
             Place Bid
+          </v-btn>
+
+          <br>
+          <v-btn
+            v-if="artwork.status === 'approved' &&
+                  artwork.stage !== 1 &&
+                  artwork.bought_by == user.id &&
+                  countdowns[artwork.id] === 'Payment In Progress'"
+            elevation="5"
+            color="warning"
+            @click="makePayment(artwork)"
+            block
+          >
+            Make Payment
           </v-btn>
         </v-card-text>
       </v-card>
