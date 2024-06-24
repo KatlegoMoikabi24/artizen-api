@@ -80,8 +80,7 @@ onMounted(async () => {
     const usersResponse = await axiosInstance.get(getAllUsers);
 
     artworks.value = response.data.filter(
-      item => (item.status === 'approved' && item.stage !== 1 ) ||
-              item.status === 'pending'
+      item => (item.status === 'approved' && item.stage !== 1)
     );
 
     usersData.value = usersResponse.data;
@@ -94,7 +93,7 @@ onMounted(async () => {
 
     const myPendingArtworks = artworks.value.filter(work => work.bought_by == user.id);
 
-      if(myPendingArtworks.filter(art => art.status === 'approved').length > 0) {
+      if(myPendingArtworks.filter(art => art.status === 'approved' && art.stage === 4).length > 0) {
         await Swal.fire({
           title: 'Artwork Payment Required!',
           text: 'Please Make A Payment For Artworks that needs Your Payment',
@@ -204,7 +203,10 @@ async function placeBid(artwork: any) {
           <v-text-field
             v-model="bidAmounts[artwork.id]"
             label="Enter Bid Amount.."
-            v-if="user.role !== 'admin' && artwork.stage !== 3 && artwork.status !== 'pending'"
+            v-if="artwork.status === 'approved' &&
+                  artwork.stage !== 1 &&
+                  artwork.stage !== 4 &&
+                  user.role !== 'admin'"
           >
           </v-text-field>
 
@@ -226,7 +228,10 @@ async function placeBid(artwork: any) {
           </v-btn>
 
           <v-btn
-            v-if="artwork.status === 'approved' && artwork.stage !== 3 && user.role !== 'admin'"
+            v-if="artwork.status === 'approved' &&
+                  artwork.stage !== 1 &&
+                  artwork.stage !== 4 &&
+                  user.role !== 'admin'"
             elevation="5"
             color="success"
             @click="placeBid(artwork)"
