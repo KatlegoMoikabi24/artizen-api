@@ -25,7 +25,7 @@ const artworks = ref([]);
 const countdowns = ref<{ [key: number]: string }>({});
 const usersData = ref([]);
 const user = JSON.parse(<string>localStorage.getItem('user'));
-let isBidClosed = false;
+let timeElapsed = ref(false);
 
 const bidAmounts = ref<{ [key: number]: string }>({});
 function getUserDetails(id: number) {
@@ -50,7 +50,7 @@ function startCountdown(artwork: any) {
           updateArtworkStatus(artwork.id);
           location.reload();
         } else {
-          isBidClosed = true;
+          timeElapsed.value = true;
           countdowns.value[artwork.id] = 'Payment In Progress';
         }
       } else {
@@ -196,13 +196,14 @@ async function placeBid(artwork: any) {
           <b>Status: </b> {{ artwork.status.toUpperCase() }}
           <br><br>
           <span v-if="artwork.status !== 'pending'">
-            <b>{{ isBidClosed ? 'Time Left: ' : 'Bid Status: '}} </b> {{ countdowns[artwork.id] }}
+            <b>{{ timeElapsed ? 'Time Left: ' : 'Bid Status: '}} </b> {{ countdowns[artwork.id] }}
           </span>
           <br><br>
 
           <v-text-field
             v-model="bidAmounts[artwork.id]"
             label="Enter Bid Amount.."
+            :disabled="countdowns[artwork.id] === 'Payment In Progress'"
             v-if="artwork.status === 'approved' &&
                   artwork.stage !== 1 &&
                   artwork.stage !== 4 &&
@@ -236,6 +237,7 @@ async function placeBid(artwork: any) {
             color="success"
             @click="placeBid(artwork)"
             block
+            :disabled="countdowns[artwork.id] === 'Payment In Progress'"
           >
             Place Bid
           </v-btn>

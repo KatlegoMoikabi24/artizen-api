@@ -252,7 +252,7 @@ async function reject(id: any) {
                     color="success"
                     @click="approve(item.id)"
                     elevation="7"
-                    :disabled=" item.status === 'sold'"
+                    :disabled="item.status === 'sold' || (item.status === 'approved' && item.stage !== 1)"
                   >
                     Approve
                   </v-btn>
@@ -261,7 +261,7 @@ async function reject(id: any) {
                     color="error"
                     @click="reject(item.id)"
                     elevation="7"
-                    :disabled="item.status === 'sold'"
+                    :disabled="item.status === 'sold' || item.stage === 1"
                   >
                     Reject
                   </v-btn>
