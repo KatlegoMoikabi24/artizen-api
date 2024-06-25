@@ -205,7 +205,7 @@ function exportReport() {
       text: 'Successfully download payment reports',
       showLoaderOnConfirm: true,
     });
-  }catch (e) {
+  } catch (e) {
     Swal.fire({
       icon: 'error',
       title: 'Error Occurred',
@@ -264,9 +264,10 @@ onMounted(async () => {
       onBuy.value = false;
     }
 
-    const payments_response = await axiosInstance.get(
-        (user.role === 'admin' ? getAllPaymentsAPI : getPaymentsAPI + user.id));
-    paymentHistory.value = payments_response.data;
+    const payments_response = await axiosInstance.get(getAllPaymentsAPI);
+    paymentHistory.value = (user.role !== 'admin' ? payments_response.data.filter(payment  =>
+                         payment.id === user.id || payment.artist_id === user.id) :
+                            payments_response.data);
   } catch (error) {
     alert('Error Occurred : ' + error);
   }

@@ -33,6 +33,7 @@
               />
 
               <input
+                v-if="!forgotPassword"
                 required
                 aria-required="true"
                 type="password"
@@ -50,9 +51,17 @@
               value="Submit"
               class="action"
               @click="login"
+              v-if="!forgotPassword"
               :class="{ 'action-disabled': !loginValid }"
             />
           </form>
+
+          <br>
+          <v-btn @click="resetPassword" style="border-radius: 20px" v-if="forgotPassword" block="" color="primary">Send Email</v-btn>
+          <br>
+          <a href="#" v-if="!forgotPassword" @click="forgotPassword = true" class="href">Forgot Password?</a>
+          <br>
+          <a href="#" v-if="forgotPassword"  @click="forgotPassword = false" >Sign In</a>
         </div>
 
         <div class="register" v-else>
@@ -74,6 +83,7 @@
               autofocus
               v-model="firstName"
               class="w100"
+              @input="validateAlphaOnly"
             />
 
             <input
@@ -81,13 +91,15 @@
               placeholder="Last name"
               v-model="lastName"
               class="w100"
+              @input="lastNameValidation"
             />
 
             <input
-              type="text"
+              type="email"
               class="w100"
               placeholder="Email"
               v-model="email.value"
+              @input="validateEmail"
             />
             <input
               type="password"
@@ -97,11 +109,25 @@
               minlength="5"
               required
             />
+
+            <input
+              type="password"
+              class="w100"
+              placeholder="Confirm Password"
+              v-model="confirmPassword.value"
+              minlength="5"
+              required
+            />
+
+            <span v-if="password.value !== confirmPassword.value" style="color: red">Passwords Do not Match</span>
+
             <input
               type="text"
               class="w100"
               placeholder="Contact Numbers"
               v-model="contacts"
+              @input="validatePhoneNumber"
+              :maxlength="10"
             />
 
             <br>
@@ -130,34 +156,57 @@
 <script>
 import axios from "axios";
 import Swal from "sweetalert2";
-const API_URL = import.meta.env.VITE_API_URL;
+import { createAuth0Client } from "@auth0/auth0-spa-js";
 
+const API_URL = import.meta.env.VITE_API_URL;
+// import authConfig from 'auth_config.json';
+
+const auth0 = await createAuth0Client({
+  domain: 'YOUR_DOMAIN',
+  client_id: 'YOUR_CLIENT_ID'
+});
 export default {
   data() {
     return {
       emailRegex: /^[\w\.-]+@[\w\.-]+\.\w+$/,
       passwordRegex: /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/,
-
       firstName: "",
       lastName: "",
-
+      confirmPassword: {
+        value: "",
+        error: false
+      },
       password: {
         value: "",
         error: false
       },
-
       email: {
         value: "",
         error: false
       },
       role: "",
       contacts: "",
-
-      signIn: true
+      forgotPassword: false,
+      signIn: true,
+      isInvalid: false,
     };
   },
 
   methods: {
+    validatePhoneNumber() {
+      // Regular expression to validate a 10-digit phone number
+      const phonePattern = /^\d{10}$/;
+      this.isInvalid = !phonePattern.test(this.contacts);
+    },
+    validateAlphaOnly(event) {
+      this.firstName = event.target.value.replace(/[^a-zA-Z]/g, '');
+    },
+    lastNameValidation(event) {
+      this.lastName = event.target.value.replace(/[^a-zA-Z]/g, '');
+    },
+    emailValidation(event) {
+      this.firstName = event.target.value.replace(/[^a-zA-Z]/g, '');
+    },
     async register() {
       if(this.role !== ''){
         try {
@@ -189,13 +238,13 @@ export default {
               errorMessage = message.substring(index + 1).trim();
             }
           }
-
           await Swal.fire({
             title: 'Failed to Register!',
             text: errorMessage,
             icon: 'error',
             confirmButtonText: 'Ok'
           });
+
         }
       } else {
        await Swal.fire({
@@ -206,6 +255,43 @@ export default {
         });
       }
     },
+
+    async resetPassword() {
+      try {
+
+        const email = this.email.value;
+
+        if (!this.emailRegex.test(email)) {
+          await Swal.fire({
+            title: "Invalid Email!",
+            text: "Please enter a valid email address.",
+            icon: "error",
+            confirmButtonText: "Ok"
+          });
+          return;
+        }
+
+        await sendPasswordResetEmail(auth, email, {
+          url: `${window.location.origin}/auth/reset-password`,
+          handleCodeInApp: true
+        });
+
+        await Swal.fire({
+          title: "Email Sent!",
+          text: "Please check your email for password reset instructions.",
+          icon: "success",
+          confirmButtonText: "Ok"
+        });
+      } catch (error) {
+        await Swal.fire({
+          title: "Failed to Send Email!",
+          text: error.message,
+          icon: "error",
+          confirmButtonText: "Ok"
+        });
+      }
+    },
+
     async login() {
       try {
         const response = await axios.post(`https://artizen-api.azurewebsites.net/api/v1/auth/login`, {
@@ -229,7 +315,7 @@ export default {
           await this.$router.push('/ui-components/buttons');
         }
       } catch (error) {
-         await Swal.fire({
+        await Swal.fire({
           title: 'Failed to login!',
           text: error.response.data.error,
           icon: 'error',
@@ -237,12 +323,43 @@ export default {
         });
       }
     },
-    validateEmail(event) {
+    async resetResetPassword() {
+      try {
+        const response = await axios.post(`https://artizen-api.azurewebsites.net/api/v1/auth/passwordReset`, {
+          email: this.email.value,
+          password: this.password.value
+        });
+
+        await Swal.fire({
+          title: 'Success Login!',
+          text: 'Login In Successfully',
+          icon: 'success',
+          confirmButtonText: 'Ok'
+        });
+
+        const user = response.data.data.user;
+
+        localStorage.setItem('user', JSON.stringify(user));
+        if(user.role === 'admin') {
+          await this.$router.push('/dashboard');
+        } else {
+          await this.$router.push('/ui-components/buttons');
+        }
+      } catch (error) {
+        await Swal.fire({
+          title: 'Failed to login!',
+          text: error.response.data.error,
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+      }
+    },
+     validateEmail(event) {
       this.email.error = this.email.value === "";
     },
 
     validatePassword(event) {
-      this.password.error = this.password.value <= 5;
+      this.password.error = this.password.value <= 6;
     }
   },
 

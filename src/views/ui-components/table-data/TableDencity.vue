@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import Swal from "sweetalert2";
 
 const usersData = ref([]);
 const roles = ['Buyer', 'Artist'];
@@ -10,6 +11,7 @@ const selectedRole = ref('');
 
 const API_URL = import.meta.env.VITE_API_URL;
 const getAllUsers = `${API_URL}users/`;
+const deleteUserAPI = `${API_URL}users/`;
 const axiosInstance = axios.create({
   headers: {
     'ngrok-skip-browser-warning': 'true',
@@ -22,6 +24,39 @@ const openDialog = (user:any) => {
   selectedUser.value = user;
   selectedRole.value = user.role;
   dialog.value = true;
+};
+
+const deleteUser = (user:any) => {
+
+  Swal.fire({
+    icon: 'warning',
+    title: 'Delete User',
+    text: `Are you sure you would like to delete ${user.name}`,
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'Cancel',
+    showCancelButton: true
+  }).then(async (res) => {
+    if (res.value) {
+      try {
+        await axiosInstance.delete(`${API_URL}users/${user.id}`).then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'User Deleted!',
+            text: `Successfully deleted ${user.name}`,
+            confirmButtonText: 'Ok'
+          })
+        });
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Failed to Deleted User!',
+          text: `${error}`,
+          confirmButtonText: 'Ok'
+        })
+      }
+    }
+  })
+
 };
 
 const updateRole = async () => {
@@ -64,6 +99,7 @@ onMounted(async () => {
           <th class="text-left text-subtitle-2">User Role</th>
           <th class="text-left text-subtitle-2">Date Created</th>
           <th class="text-left text-subtitle-2">Change Role</th>
+          <th class="text-left text-subtitle-2">Remove User</th>
         </tr>
         </thead>
         <tbody>
@@ -76,6 +112,11 @@ onMounted(async () => {
           <td class="pa-2">
             <v-btn @click="openDialog(item)" dense>
               Change Role
+            </v-btn>
+          </td>
+          <td class="pa-3">
+            <v-btn @click="deleteUser(item)" color="red">
+              Delete
             </v-btn>
           </td>
         </tr>

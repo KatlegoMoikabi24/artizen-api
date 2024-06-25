@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const usersData = ref([]);
 const roles = ['Buyer', 'Artist'];
@@ -35,20 +36,31 @@ const getAllUsers = async () => {
 
 const updateUser = async (user:any) => {
 
-  try {
-    isLoading.value = true;
+  if(user.newPassword === user.password || !user.newPassword){
+    try {
+      isLoading.value = true;
 
-    await axiosInstance.post(`${API_URL}users/${user.id}`, {
-      name: user.name,
-      surname: user.surname,
-      email: user.email,
-      role: user.role,
-      contacts: user.contacts
-    });
-    alert('User updated successfully!');
-  } catch (error) {
-    console.error('Error updating user:', error);
-    alert('Failed to update user.');
+      await axiosInstance.post(`${API_URL}users/${user.id}`, {
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        role: user.role,
+        contacts: user.contacts
+      });
+      alert('User updated successfully!');
+    } catch (error) {
+      console.error('Error updating user:', error);
+      alert('Failed to update user.');
+    }
+  } else {
+    Swal.fire({
+      title: 'Failed To Update User',
+      text: `Password provided for ${user.name} do not match`,
+      icon: 'error',
+      confirmButtonText: 'Ok'
+    }).then(() => {
+      location.reload();
+    })
   }
   isLoading.value = false;
 
@@ -67,7 +79,7 @@ onMounted(getAllUsers);
       Manage User Profile
     </p>
     <div class="mt-4">
-      <v-table fixed-header height="300px">
+      <v-table  height="300px">
         <thead>
         <tr>
           <th class="text-left">Name</th>
@@ -75,6 +87,8 @@ onMounted(getAllUsers);
           <th class="text-left">Email</th>
           <th class="text-left">User Role</th>
           <th class="text-left">Phone Numbers</th>
+          <th class="text-left">Password</th>
+          <th class="text-left">Confirm Password</th>
           <th class="text-left">Actionable Item</th>
         </tr>
         </thead>
@@ -101,6 +115,12 @@ onMounted(getAllUsers);
           </td>
           <td>
             <v-text-field v-model="user.contacts" dense hide-details type="Phone Number"></v-text-field>
+          </td>
+          <td>
+            <v-text-field v-model="user.password" dense hide-details type=""></v-text-field>
+          </td>
+          <td>
+            <v-text-field v-model="user.newPassword" dense hide-details type="Phone Number"></v-text-field>
           </td>
           <td>
             <v-btn @click="updateUser(user)" dense>Update</v-btn>

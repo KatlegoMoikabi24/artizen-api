@@ -66,11 +66,13 @@
             Artwork design by
             <b>{{ `${userDetails.name} ${userDetails.surname}` }}</b>
           </p>
-           <b>Status: </b> {{ artwork.status.toUpperCase() }}
+          <b>Status: </b> {{ artwork.status.toUpperCase() }}
+          <br>
+          <b v-if="artwork.status === 'sold'">Purchased By:  {{ getUserDetails(artwork.bought_by) }}</b>
           <br>
           <br>
           <v-btn
-            v-if="(artwork.status !== 'approved' || artwork.stage == 1) || artwork.status === 'sold'"
+            :disabled="!(artwork.status === 'pending' || artwork.stage == 1)"
             elevation="5"
             color="success"
             @click="deleteArtwork(artwork)"
@@ -97,6 +99,9 @@ let isLoading = ref(false);
 const imageUrl = ref<string | null>(null);
 const artworks = ref([]);
 const userDetails = ref({});
+
+const getAllUsers = `${API_URL}users/`;
+const usersData = ref([]);
 
 const imageApiUrl = `${API_URL}artwork/image/`;
 const getByArtistId = `${API_URL}artwork/artist/`;
@@ -153,9 +158,11 @@ onMounted(async () => {
     isLoading.value = true;
     const user = JSON.parse(<string>localStorage.getItem('user'));
     const response = await axiosInstance.get(getByArtistId + user.id);
+    const usersResponse = await axiosInstance.get(getAllUsers);
 
     artworks.value = response.data.artworks;
     userDetails.value = response.data.user;
+    usersData.value = usersResponse.data;
 
   } catch (error) {
     console.error('Error fetching artworks:', error);
@@ -164,6 +171,13 @@ onMounted(async () => {
   isLoading.value = false;
 
 });
+function getUserDetails(id: any) {
+  const userObj = usersData.value.find(item => item.id === id);
+
+  if(userObj) {
+    return `${userObj.name}  ${userObj.surname}`;
+  }
+}
 async function upload() {
 
   const user = JSON.parse(<string>localStorage.getItem('user'));
