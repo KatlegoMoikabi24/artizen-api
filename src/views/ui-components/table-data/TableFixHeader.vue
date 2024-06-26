@@ -45,7 +45,8 @@ const updateUser = async (user:any) => {
         surname: user.surname,
         email: user.email,
         role: user.role,
-        contacts: user.contacts
+        contacts: user.contacts,
+        password: user.password
       });
       alert('User updated successfully!');
     } catch (error) {
