@@ -10,6 +10,7 @@ const getAllArtworks = `${API_URL}artwork/`;
 const getAllUsers = `${API_URL}users/`;
 const approveAPI = `${API_URL}artwork/approve/`;
 const rejectAPI = `${API_URL}artwork/reject/`;
+let isLoading = ref(false);
 
 const axiosInstance = axios.create({
   headers: {
@@ -94,6 +95,7 @@ async function reject(id: any) {
 
 onMounted(async () => {
   try {
+    isLoading.value = true;
     const response = await axiosInstance.get(getAllArtworks);
     const usersResponse = await axiosInstance.get(getAllUsers);
 
@@ -101,12 +103,19 @@ onMounted(async () => {
     usersData.value = usersResponse.data;
 
   } catch (error) {
+    isLoading.value = false;
     console.error('Error fetching artworks:', error);
   }
+  isLoading.value = false;
+
 });
 </script>
 
 <template>
+  <div v-if="isLoading" class="overlay">
+    <div class="loader"></div>
+    <p>Loading...</p>
+  </div>
   <h1>
     Manage Artworks
   </h1>
@@ -156,3 +165,31 @@ onMounted(async () => {
     </v-col>
   </v-row>
 </template>
+<style scoped>
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
