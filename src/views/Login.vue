@@ -156,15 +156,9 @@
 <script>
 import axios from "axios";
 import Swal from "sweetalert2";
-import { createAuth0Client } from "@auth0/auth0-spa-js";
 
 const API_URL = import.meta.env.VITE_API_URL;
-// import authConfig from 'auth_config.json';
 
-const auth0 = await createAuth0Client({
-  domain: 'YOUR_DOMAIN',
-  client_id: 'YOUR_CLIENT_ID'
-});
 export default {
   data() {
     return {
@@ -208,7 +202,38 @@ export default {
       this.firstName = event.target.value.replace(/[^a-zA-Z]/g, '');
     },
     async register() {
-      if(this.role !== ''){
+      if(this.contacts.length !== 10) {
+        await Swal.fire({
+          title: 'Invalid Contacts!',
+          text: 'Contact Numbers must have exactly 10 digits',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+      const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
+      if(this.password.value !== this.confirmPassword.value) {
+        await Swal.fire({
+          title: 'Invalid Passwords!',
+          text: 'The Two Passwords Do Not Match, Make Sure You Enter Correct Passwords',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+
+      if(!passwordPattern.test(this.password.value)) {
+        await Swal.fire({
+          title: 'Invalid Password!',
+          text: 'Password must be at least 6 characters long, and include at least one uppercase letter, one lowercase letter, one digit, and one special character.',
+          icon: 'error',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+
+      if(this.role !== '') {
         try {
           await axios.post(
             `${API_URL}auth/register`, {
@@ -271,17 +296,17 @@ export default {
           return;
         }
 
-        await sendPasswordResetEmail(auth, email, {
-          url: `${window.location.origin}/auth/reset-password`,
-          handleCodeInApp: true
-        });
+       await axios.post(`https://artizen-api.azurewebsites.net/api/v1/auth/passwordReset`, {
+         email: this.email.value,
+       }).then(async () => {
+         await Swal.fire({
+           title: "Email Sent!",
+           text: "Please check your email for password reset instructions.",
+           icon: "success",
+           confirmButtonText: "Ok"
+         });
+       });
 
-        await Swal.fire({
-          title: "Email Sent!",
-          text: "Please check your email for password reset instructions.",
-          icon: "success",
-          confirmButtonText: "Ok"
-        });
       } catch (error) {
         await Swal.fire({
           title: "Failed to Send Email!",
